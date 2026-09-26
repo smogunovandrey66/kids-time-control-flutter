@@ -74,6 +74,7 @@ void main() {
     expect(device.activeChildId, 'ivan');
     expect(device.isOnline(DateTime.utc(2026, 9, 26, 16, 43)), isTrue);
     expect(device.isOnline(DateTime.utc(2026, 9, 26, 17)), isFalse);
+    expect(device.isOnline(DateTime.utc(2026, 9, 26, 16, 50)), isTrue);
 
     final usage = example('usage');
     final daily = DailyUsage.fromJson(usage);

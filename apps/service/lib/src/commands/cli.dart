@@ -11,6 +11,7 @@ import 'match_command.dart';
 import 'pair_command.dart';
 import 'processes_command.dart';
 import 'run_command.dart';
+import 'service_command.dart';
 import 'sync_command.dart';
 
 const appVersion = '0.1.0';
@@ -77,4 +78,5 @@ CommandRunner<int> buildCli(CliContext context) =>
       ..addCommand(HashPinCommand(context))
       ..addCommand(RunCommand(context))
       ..addCommand(PairCommand(context))
-      ..addCommand(SyncCommand(context));
+      ..addCommand(SyncCommand(context))
+      ..addCommand(ServiceCommand(context));

@@ -59,10 +59,10 @@ final class Device {
   final DateTime? lastSeen;
   final String? activeChildId;
 
-  /// The PC reports every minute; a longer silence means it is off or cut off.
+  /// The PC reports every 5 minutes; a longer silence means it is off or cut off.
   bool isOnline(DateTime now) =>
       lastSeen != null &&
-      now.difference(lastSeen!) < const Duration(minutes: 3);
+      now.difference(lastSeen!) < const Duration(minutes: 11);
 
   Map<String, Object?> toJson() => {
     'name': name,

@@ -6,6 +6,8 @@ final class FakeProcessControl implements ProcessControl {
 
   final List<ProcessInfo> processes;
   final terminated = <int>[];
+  final suspended = <int>[];
+  final resumed = <int>[];
 
   @override
   List<ProcessInfo> list() => List.of(processes);
@@ -18,10 +20,16 @@ final class FakeProcessControl implements ProcessControl {
   }
 
   @override
-  bool suspend(int pid) => true;
+  bool suspend(int pid) {
+    suspended.add(pid);
+    return true;
+  }
 
   @override
-  bool resume(int pid) => true;
+  bool resume(int pid) {
+    resumed.add(pid);
+    return true;
+  }
 }
 
 const minecraft = ProcessInfo(

@@ -1,0 +1,29 @@
+<!--
+  WinSW configuration: WinSW (renamed to KidsTimeControl.exe) registers itself as a
+  Windows service and runs `ktc.exe service`. See https://github.com/winsw/winsw
+-->
+<service>
+  <id>KidsTimeControl</id>
+  <name>Kids Time Control</name>
+  <description>Controls the time children spend in games. https://github.com/smogunovandrey66/kids-time-control-flutter</description>
+
+  <executable>%BASE%\ktc.exe</executable>
+  <arguments>service</arguments>
+
+  <!-- LocalSystem (the default): children with standard accounts cannot stop it. -->
+  <startmode>Automatic</startmode>
+  <delayedAutoStart>false</delayedAutoStart>
+
+  <onfailure action="restart" delay="10 sec"/>
+  <onfailure action="restart" delay="30 sec"/>
+  <onfailure action="restart" delay="60 sec"/>
+  <resetfailure>1 hour</resetfailure>
+
+  <stoptimeout>15 sec</stoptimeout>
+
+  <logpath>%ProgramData%\KidsTimeControl\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>1024</sizeThreshold>
+    <keepFiles>5</keepFiles>
+  </log>
+</service>

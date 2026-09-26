@@ -51,12 +51,39 @@ jobs:
           New-Item -ItemType Directory -Force build | Out-Null
           dart compile exe apps/service/bin/ktc.dart -o build/ktc.exe
 
-      - name: Upload ktc.exe
+      - name: Package with WinSW
+        if: runner.os == 'Windows'
+        run: |
+          $package = 'build/kids-time-control-windows'
+          New-Item -ItemType Directory -Force $package | Out-Null
+          Copy-Item build/ktc.exe, packaging/windows/* $package
+          Invoke-WebRequest https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe -OutFile "$package/KidsTimeControl.exe"
+          Compress-Archive -Path "$package/*" -DestinationPath build/kids-time-control-windows.zip -Force
+
+      # Installs the real service on the runner, checks that it runs and writes its log, removes it.
+      - name: Install and start the service
+        if: runner.os == 'Windows'
+        run: |
+          ./build/kids-time-control-windows/install.ps1
+          Start-Sleep -Seconds 8
+          $service = Get-Service KidsTimeControl
+          if ($service.Status -ne 'Running') { throw "Service is $($service.Status)" }
+          $log = Get-ChildItem "$env:ProgramData/KidsTimeControl/logs" -Filter *.out.log | Select-Object -First 1
+          Get-Content $log.FullName
+          if (-not (Select-String -Path $log.FullName -Pattern 'Kids Time Control' -Quiet)) { throw 'No service log' }
+
+      - name: Uninstall the service
+        if: runner.os == 'Windows'
+        run: |
+          ./build/kids-time-control-windows/uninstall.ps1 -RemoveData
+          if (Get-Service KidsTimeControl -ErrorAction SilentlyContinue) { throw 'Service still installed' }
+
+      - name: Upload the Windows package
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: ktc-windows
-          path: build/ktc.exe
+          name: kids-time-control-windows
+          path: build/kids-time-control-windows.zip
 
   parent-app:
     name: Parent app (Flutter Android)
