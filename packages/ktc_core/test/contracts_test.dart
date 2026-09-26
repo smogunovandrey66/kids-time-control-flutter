@@ -28,8 +28,15 @@ void main() {
     );
     expect(verifyPin('1234', child.pinHash), isTrue);
 
-    final expected = Map.of(json)..remove('bonus');
-    expect(child.toJson(), expected);
+    expect(child.toJson(), json);
+    expect(
+      child.limitFor(DateTime(2026, 9, 26)),
+      const Duration(seconds: 7200 + 900),
+    );
+    expect(
+      child.limitFor(DateTime(2026, 9, 27)),
+      const Duration(seconds: 7200),
+    );
   });
 
   test('app example round-trips and matches Minecraft', () {
@@ -56,5 +63,24 @@ void main() {
     expect(config.child('ivan')?.name, 'Иван');
     expect(config.child('nobody'), isNull);
     expect(config.apps.map((app) => app.id), ['minecraft', 'roblox']);
+  });
+
+  test('family, device and usage examples round-trip', () {
+    final family = example('family');
+    expect(Family.fromJson('f1', family).toJson(), family);
+
+    final device = Device.fromJson('pc', example('device'));
+    expect(device.activeChildId, 'ivan');
+    expect(device.isOnline(DateTime.utc(2026, 9, 26, 16, 43)), isTrue);
+    expect(device.isOnline(DateTime.utc(2026, 9, 26, 17)), isFalse);
+
+    final usage = example('usage');
+    final daily = DailyUsage.fromJson(usage);
+    expect(daily.apps, {'minecraft': 2400, 'roblox': 600});
+    expect(DailyUsage.documentId(daily.childId, daily.date), 'ivan_2026-09-26');
+    expect(
+      jsonEncode(daily.toJson()),
+      jsonEncode(usage).replaceAll('Z"', '.000Z"'),
+    );
   });
 }

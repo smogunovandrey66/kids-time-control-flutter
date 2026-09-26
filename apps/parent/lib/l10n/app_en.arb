@@ -1,0 +1,102 @@
+{
+  "@@locale": "en",
+  "appTitle": "Kids Time Control",
+  "firebaseNotConfiguredTitle": "Firebase is not configured",
+  "firebaseNotConfiguredBody": "Run `flutterfire configure` in apps/parent to connect the app to your Firebase project. See apps/parent/README.md.",
+  "signInTitle": "Screen time for your kids",
+  "signInDescription": "Sign in to manage children, games and limits on your home PC.",
+  "signInWithGoogle": "Sign in with Google",
+  "signOut": "Sign out",
+  "createFamilyTitle": "Create your family",
+  "createFamilyDescription": "Children, games and computers are shared within a family.",
+  "familyName": "Family name",
+  "createFamily": "Create",
+  "tabToday": "Today",
+  "tabChildren": "Children",
+  "tabGames": "Games",
+  "tabComputers": "Computers",
+  "todayNoChildren": "Add a child on the Children tab.",
+  "usedOfLimit": "{used} of {limit}",
+  "@usedOfLimit": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "remaining": "{time} left",
+  "@remaining": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "addMinutes": "+{minutes} min",
+  "@addMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "bonusAdded": "Extra time added for today",
+  "childrenEmpty": "No children yet.",
+  "addChild": "Add child",
+  "editChild": "Edit child",
+  "childName": "Name",
+  "pin": "PIN (4-6 digits)",
+  "pinHintNew": "The child enters it on the PC",
+  "pinHintKeep": "Leave empty to keep the current PIN",
+  "weekdayLimit": "Weekday limit, minutes",
+  "weekendLimit": "Weekend limit, minutes",
+  "save": "Save",
+  "delete": "Delete",
+  "errorNameEmpty": "Enter a name",
+  "errorNameTooLong": "The name is too long",
+  "errorPinInvalid": "PIN must be 4 to 6 digits",
+  "errorPinRequired": "Set a PIN",
+  "errorLimitInvalid": "Enter minutes from 0 to 1440",
+  "gamesEmpty": "No games yet. Add the games your children play on the PC.",
+  "addGame": "Add game",
+  "editGame": "Game",
+  "gameName": "Name",
+  "exeName": "Executable name, e.g. RobloxPlayerBeta.exe",
+  "exePath": "Full path to the executable",
+  "commandLineContains": "Command line contains",
+  "matchHint": "Fill in at least one field. `ktc processes` on the PC shows the values.",
+  "errorNoCriteria": "Fill in at least one of the fields",
+  "computersEmpty": "No computers yet. Pair the PC your children use.",
+  "pairComputer": "Pair computer",
+  "pairingCodeLabel": "Code from the PC",
+  "pairingHint": "Run `ktc pair` on the PC and enter the code it shows.",
+  "pair": "Pair",
+  "cancel": "Cancel",
+  "paired": "Computer paired",
+  "pairingNotFound": "Code not found or expired",
+  "pairingInvalid": "A code has 8 characters",
+  "online": "Online",
+  "offline": "Offline",
+  "lastSeen": "Last seen {time}",
+  "@lastSeen": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "neverSeen": "Has not connected yet",
+  "removeComputer": "Remove",
+  "weekTitle": "Last 7 days",
+  "errorGeneric": "Something went wrong: {message}",
+  "@errorGeneric": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  }
+}

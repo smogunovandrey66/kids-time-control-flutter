@@ -1,0 +1,29 @@
+name: ktc_parent
+description: Parent app of Kids Time Control (Flutter, Android).
+publish_to: 'none'
+resolution: workspace
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  cloud_firestore: ^6.10.0
+  firebase_auth: ^6.7.0
+  firebase_core: ^4.15.0
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  flutter_timezone: ^5.1.0
+  intl: ^0.20.3
+  ktc_core:
+    path: ../../packages/ktc_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  generate: true

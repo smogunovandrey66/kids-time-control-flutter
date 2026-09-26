@@ -42,6 +42,7 @@ final class Child {
     required this.name,
     required this.pinHash,
     required this.limits,
+    this.bonus,
     this.archived = false,
   });
 
@@ -51,6 +52,10 @@ final class Child {
     name: json['name']! as String,
     pinHash: json['pinHash']! as String,
     limits: Limits.fromJson(json['limits']! as Map<String, Object?>),
+    bonus: switch (json['bonus']) {
+      final Map<String, Object?> bonus => Bonus.fromJson(bonus),
+      _ => null,
+    },
     archived: json['archived'] as bool? ?? false,
   );
 
@@ -60,15 +65,62 @@ final class Child {
   /// `pbkdf2-sha256$iterations$salt$hash`, see `pin.dart`.
   final String pinHash;
   final Limits limits;
+
+  /// Extra time granted by the parent for one day.
+  final Bonus? bonus;
   final bool archived;
+
+  /// Today's limit including the parent's bonus.
+  Duration limitFor(DateTime date) {
+    final extra = bonus != null && bonus!.date == dateKey(date)
+        ? bonus!.seconds
+        : 0;
+    return Duration(seconds: limits.secondsFor(date) + extra);
+  }
+
+  Child copyWith({
+    String? name,
+    String? pinHash,
+    Limits? limits,
+    Bonus? bonus,
+    bool? archived,
+  }) => Child(
+    id: id,
+    name: name ?? this.name,
+    pinHash: pinHash ?? this.pinHash,
+    limits: limits ?? this.limits,
+    bonus: bonus ?? this.bonus,
+    archived: archived ?? this.archived,
+  );
 
   Map<String, Object?> toJson() => {
     'name': name,
     'pinHash': pinHash,
     'limits': limits.toJson(),
+    'bonus': ?bonus?.toJson(),
     'archived': archived,
   };
 }
+
+/// Extra time for one local day.
+final class Bonus {
+  const Bonus({required this.date, required this.seconds});
+
+  factory Bonus.fromJson(Map<String, Object?> json) =>
+      Bonus(date: json['date']! as String, seconds: json['seconds']! as int);
+
+  /// `YYYY-MM-DD`, see [dateKey].
+  final String date;
+  final int seconds;
+
+  Map<String, Object?> toJson() => {'date': date, 'seconds': seconds};
+}
+
+/// Local calendar day as used in document ids: `YYYY-MM-DD`.
+String dateKey(DateTime date) =>
+    '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}-'
+    '${date.day.toString().padLeft(2, '0')}';
 
 /// How to recognize a controlled game. Every non-empty criterion must match;
 /// a rule without criteria never matches.
