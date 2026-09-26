@@ -67,6 +67,8 @@
   "exeName": "Executable name, e.g. RobloxPlayerBeta.exe",
   "exePath": "Full path to the executable",
   "commandLineContains": "Command line contains",
+  "gameFolder": "Or any program in the folder",
+  "gameFolderHint": "Renaming the exe will not help. * is any folder name: C:\\Users\\*\\AppData\\Local\\Roblox",
   "matchHint": "Fill in at least one field. `ktc processes` on the PC shows the values.",
   "errorNoCriteria": "Fill in at least one of the fields",
   "computersEmpty": "No computers yet. Pair the PC your children use.",

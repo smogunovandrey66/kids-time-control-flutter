@@ -148,6 +148,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get commandLineContains => 'Командная строка содержит';
 
   @override
+  String get gameFolder => 'Или любая программа из папки';
+
+  @override
+  String get gameFolderHint =>
+      'Переименование exe не поможет. * — любое имя папки: C:\\Users\\*\\AppData\\Local\\Roblox';
+
+  @override
   String get matchHint =>
       'Заполните хотя бы одно поле. Значения показывает `ktc processes` на ПК.';
 

@@ -148,6 +148,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commandLineContains => 'Command line contains';
 
   @override
+  String get gameFolder => 'Or any program in the folder';
+
+  @override
+  String get gameFolderHint =>
+      'Renaming the exe will not help. * is any folder name: C:\\Users\\*\\AppData\\Local\\Roblox';
+
+  @override
   String get matchHint =>
       'Fill in at least one field. `ktc processes` on the PC shows the values.';
 

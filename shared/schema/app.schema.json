@@ -4,21 +4,46 @@
   "title": "App",
   "description": "families/{familyId}/apps/{appId}: a controlled game and how to recognize its process. Empty or missing criteria are ignored; at least one must be set.",
   "type": "object",
-  "required": ["name", "match", "archived"],
+  "required": [
+    "name",
+    "match",
+    "archived"
+  ],
   "additionalProperties": false,
   "properties": {
-    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
     "match": {
       "type": "object",
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
-        "exePath": { "type": "string", "description": "Full path, case-insensitive." },
-        "exeName": { "type": "string", "description": "File name, e.g. javaw.exe" },
-        "commandLineContains": { "type": "string" },
-        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "exePath": {
+          "type": "string",
+          "description": "Full path, case-insensitive."
+        },
+        "exeName": {
+          "type": "string",
+          "description": "File name, e.g. javaw.exe"
+        },
+        "commandLineContains": {
+          "type": "string"
+        },
+        "folder": {
+          "type": "string",
+          "description": "Any program in this folder or its subfolders; '*' matches one folder name, e.g. C:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Roblox. Renaming the exe does not help."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
       }
     },
-    "archived": { "type": "boolean" }
+    "archived": {
+      "type": "boolean"
+    }
   }
 }

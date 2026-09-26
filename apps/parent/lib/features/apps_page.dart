@@ -13,6 +13,7 @@ void openAppEditor(BuildContext context, [AppRule? app]) => Navigator.of(
 String describeMatch(AppRule app) => [
   ?app.exeName,
   ?app.exePath,
+  if (app.folder case final folder?) '$folder\\…',
   if (app.commandLineContains case final text? when text.isNotEmpty) '"$text"',
 ].where((part) => part.isNotEmpty).join(' · ');
 
@@ -59,12 +60,19 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
   late final _commandLine = TextEditingController(
     text: widget.app?.commandLineContains,
   );
+  late final _folder = TextEditingController(text: widget.app?.folder);
   String? _nameError;
   String? _criteriaError;
 
   @override
   void dispose() {
-    for (final controller in [_name, _exeName, _exePath, _commandLine]) {
+    for (final controller in [
+      _name,
+      _exeName,
+      _exePath,
+      _commandLine,
+      _folder,
+    ]) {
       controller.dispose();
     }
     super.dispose();
@@ -80,9 +88,14 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
     final exeName = _valueOrNull(_exeName);
     final exePath = _valueOrNull(_exePath);
     final commandLine = _valueOrNull(_commandLine);
+    final folder = _valueOrNull(_folder);
     setState(() {
       _nameError = _name.text.trim().isEmpty ? l10n.errorNameEmpty : null;
-      _criteriaError = exeName == null && exePath == null && commandLine == null
+      _criteriaError =
+          exeName == null &&
+              exePath == null &&
+              commandLine == null &&
+              folder == null
           ? l10n.errorNoCriteria
           : null;
     });
@@ -100,6 +113,7 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
           exeName: exeName,
           exePath: exePath,
           commandLineContains: commandLine,
+          folder: folder,
         ),
       );
       navigator.pop();
@@ -121,6 +135,7 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
               exeName: app.exeName,
               exePath: app.exePath,
               commandLineContains: app.commandLineContains,
+              folder: app.folder,
               archived: true,
             ),
           );
@@ -171,6 +186,14 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
           TextField(
             controller: _commandLine,
             decoration: InputDecoration(labelText: l10n.commandLineContains),
+          ),
+          TextField(
+            controller: _folder,
+            decoration: InputDecoration(
+              labelText: l10n.gameFolder,
+              helperText: l10n.gameFolderHint,
+              helperMaxLines: 3,
+            ),
           ),
           const SizedBox(height: 24),
           FilledButton(onPressed: _save, child: Text(l10n.save)),

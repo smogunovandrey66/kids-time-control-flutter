@@ -80,4 +80,43 @@ void main() {
     expect(matcher.match(process(r'D:\game.exe'))?.id, 'game');
     expect(matcher.match(process(r'D:\notepad.exe')), isNull);
   });
+
+  test('matches any program in a folder, whatever it is called', () {
+    const rule = AppRule(
+      id: 'roblox',
+      name: 'Roblox',
+      folder: r'C:\Users\*\AppData\Local\Roblox\',
+    );
+
+    for (final path in [
+      r'C:\Users\Ivan\AppData\Local\Roblox\Versions\v1\RobloxPlayerBeta.exe',
+      r'c:\users\marina\appdata\local\roblox\renamed.exe',
+      'C:/Users/Ivan/AppData/Local/Roblox/x.exe',
+    ]) {
+      expect(AppMatcher.ruleMatches(rule, process(path)), isTrue, reason: path);
+    }
+    for (final path in [
+      r'C:\Users\Ivan\AppData\Local\RobloxOld\x.exe',
+      r'C:\Users\Ivan\AppData\Local\Roblox',
+      r'C:\Users\AppData\Local\Roblox\x.exe',
+      r'D:\Users\Ivan\AppData\Local\Roblox\x.exe',
+    ]) {
+      expect(
+        AppMatcher.ruleMatches(rule, process(path)),
+        isFalse,
+        reason: path,
+      );
+    }
+  });
+
+  test('a star can be part of a folder name', () {
+    expect(
+      AppMatcher.isInFolder(r'D:\Games\Steam1\a.exe', r'D:\Games\Steam*'),
+      isTrue,
+    );
+    expect(
+      AppMatcher.isInFolder(r'D:\Games\Epic\a.exe', r'D:\Games\Steam*'),
+      isFalse,
+    );
+  });
 }

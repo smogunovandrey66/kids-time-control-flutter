@@ -356,6 +356,18 @@ abstract class AppLocalizations {
   /// **'Command line contains'**
   String get commandLineContains;
 
+  /// No description provided for @gameFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Or any program in the folder'**
+  String get gameFolder;
+
+  /// No description provided for @gameFolderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Renaming the exe will not help. * is any folder name: C:\\Users\\*\\AppData\\Local\\Roblox'**
+  String get gameFolderHint;
+
   /// No description provided for @matchHint.
   ///
   /// In en, this message translates to:

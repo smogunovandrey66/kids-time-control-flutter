@@ -115,6 +115,26 @@ void main() {
       expect(families.apps.values.single.exeName, 'RobloxPlayerBeta.exe');
     });
 
+    testWidgets('a game can be every program in a folder', (tester) async {
+      await pump(tester);
+      await tester.tap(find.text('Games'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add game'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Roblox');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Or any program in the folder'),
+        r'C:\Users\*\AppData\Local\Roblox',
+      );
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      final app = families.apps.values.single;
+      expect(app.folder, r'C:\Users\*\AppData\Local\Roblox');
+      expect(app.exeName, isNull);
+    });
+
     testWidgets('pairs a computer by code', (tester) async {
       families.pairingRequests['K7QM4XP2'] = 'pc-uid';
       await pump(tester);

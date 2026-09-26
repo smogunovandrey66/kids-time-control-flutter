@@ -131,6 +131,7 @@ final class AppRule {
     this.exePath,
     this.exeName,
     this.commandLineContains,
+    this.folder,
     this.archived = false,
   });
 
@@ -142,6 +143,7 @@ final class AppRule {
       exePath: match['exePath'] as String?,
       exeName: match['exeName'] as String?,
       commandLineContains: match['commandLineContains'] as String?,
+      folder: match['folder'] as String?,
       archived: json['archived'] as bool? ?? false,
     );
   }
@@ -151,6 +153,11 @@ final class AppRule {
   final String? exePath;
   final String? exeName;
   final String? commandLineContains;
+
+  /// Any program inside this folder or its subfolders. `*` stands for one
+  /// folder name, e.g. `C:\Users\*\AppData\Local\Roblox` for every user.
+  /// Renaming or copying the game's exe inside the folder does not help.
+  final String? folder;
   final bool archived;
 
   Map<String, Object?> toJson() => {
@@ -159,6 +166,7 @@ final class AppRule {
       'exePath': ?exePath,
       'exeName': ?exeName,
       'commandLineContains': ?commandLineContains,
+      'folder': ?folder,
     },
     'archived': archived,
   };

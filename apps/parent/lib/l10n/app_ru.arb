@@ -43,6 +43,8 @@
   "exeName": "Имя exe, например RobloxPlayerBeta.exe",
   "exePath": "Полный путь к exe",
   "commandLineContains": "Командная строка содержит",
+  "gameFolder": "Или любая программа из папки",
+  "gameFolderHint": "Переименование exe не поможет. * — любое имя папки: C:\\Users\\*\\AppData\\Local\\Roblox",
   "matchHint": "Заполните хотя бы одно поле. Значения показывает `ktc processes` на ПК.",
   "errorNoCriteria": "Заполните хотя бы одно из полей",
   "computersEmpty": "Компьютеров пока нет. Привяжите ПК, за которым играют дети.",
