@@ -475,6 +475,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong: {message}'**
   String errorGeneric(String message);
+
+  /// No description provided for @pickFromPc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from programs on the PC'**
+  String get pickFromPc;
+
+  /// No description provided for @pickFromPcHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What ran on your computers in the last two weeks, most used first'**
+  String get pickFromPcHint;
+
+  /// No description provided for @programsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet. The list fills in as the PC is used (updated every 5 minutes).'**
+  String get programsEmpty;
+
+  /// No description provided for @programUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} in 2 weeks · {devices}'**
+  String programUsage(String time, String devices);
+
+  /// No description provided for @alreadyGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Already a game: {name}'**
+  String alreadyGame(String name);
+
+  /// No description provided for @foundOnPc.
+  ///
+  /// In en, this message translates to:
+  /// **'Found on the PC: {path}'**
+  String foundOnPc(String path);
+
+  /// No description provided for @adminWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Children can turn off the control'**
+  String get adminWarningTitle;
+
+  /// No description provided for @adminWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'On {device}, the Windows account at the screen is an administrator. Create a standard (non-administrator) account for the children and keep the administrator password to yourself.'**
+  String adminWarning(String device);
 }
 
 class _AppLocalizationsDelegate

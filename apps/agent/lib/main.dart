@@ -20,6 +20,7 @@ Future<void> main() async {
   final controller = AgentController(
     connect: connectToService,
     sessionId: currentSessionId(),
+    userIsAdmin: currentUserIsAdmin(),
     version: _version,
   )..start();
 

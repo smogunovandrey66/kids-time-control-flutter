@@ -23,6 +23,17 @@ class DevicesPage extends ConsumerWidget {
       AsyncData(value: final list) => ListView(
         children: [
           for (final device in list)
+            if (device.userIsAdmin ?? false)
+              Card(
+                margin: const EdgeInsets.all(12),
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: ListTile(
+                  leading: const Icon(Icons.warning_amber),
+                  title: Text(l10n.adminWarningTitle),
+                  subtitle: Text(l10n.adminWarning(device.name)),
+                ),
+              ),
+          for (final device in list)
             ListTile(
               leading: Icon(
                 Icons.computer,

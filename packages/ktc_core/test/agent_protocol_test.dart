@@ -10,7 +10,7 @@ void main() {
 
   test('every message survives encoding', () async {
     const messages = <AgentMessage>[
-      AgentHello(sessionId: 1, version: '0.1.0'),
+      AgentHello(sessionId: 1, version: '0.1.0', userIsAdmin: true),
       LoginRequest(
         id: 7,
         appName: 'Minecraft',

@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:ktc_core/ktc_core.dart';
 
 import '../cloud/cloud_sync.dart';
 import '../commands/cli.dart' show appVersion;
 import '../storage/data_dir.dart';
+import 'program_catalog.dart';
 import 'service_engine.dart';
 
 /// The service main loop: ticks the engine and synchronizes with the cloud.
@@ -28,6 +30,8 @@ final class ServiceRunner {
     this.syncInterval = const Duration(minutes: 1),
     this.statusInterval = const Duration(minutes: 5),
     this.afterTick,
+    this.catalog,
+    this.userIsAdmin,
     void Function(String message)? log,
   }) : _log = log ?? ((_) {});
 
@@ -43,6 +47,13 @@ final class ServiceRunner {
 
   /// Called after every engine tick (e.g. to update the tray agents).
   final void Function()? afterTick;
+
+  /// Programs to report with the status (and to keep in `programs.json`).
+  final ProgramCatalog? catalog;
+
+  /// Whether the Windows user at the screen is an administrator (from the agent).
+  final bool? Function()? userIsAdmin;
+  bool? _reportedAdmin;
   final void Function(String message) _log;
 
   var _stopped = false;
@@ -69,6 +80,7 @@ final class ServiceRunner {
         _sync = syncOnce().whenComplete(() => _sync = null);
       }
     }
+    saveCatalog();
     _log('Service stopped.');
   }
 
@@ -94,20 +106,40 @@ final class ServiceRunner {
       _firstSync = false;
 
       final now = monotonicNow();
+      final admin = userIsAdmin?.call();
       if (_lastStatus == null ||
           now - _lastStatus! >= statusInterval ||
-          _reportedChild != engine.activeChildId) {
+          _reportedChild != engine.activeChildId ||
+          (admin != null && admin != _reportedAdmin)) {
+        final today = dateKey(wallClock());
         await cloud.reportStatus(
           appVersion: appVersion,
           activeChildId: engine.activeChildId,
+          userIsAdmin: admin,
+          programs: catalog?.top(today) ?? const [],
           now: wallClock(),
         );
         _lastStatus = now;
         _reportedChild = engine.activeChildId;
+        _reportedAdmin = admin;
+        saveCatalog();
       }
       dir.writeJson(dir.cloudFile, cloud.state.toJson());
     } on Exception catch (error) {
       _log('Sync failed (will retry): $error');
+    }
+  }
+
+  /// Keeps the program history across restarts.
+  void saveCatalog() {
+    final catalog = this.catalog;
+    if (catalog == null) return;
+    try {
+      dir.writeJson(dir.programsFile, {
+        'programs': catalog.toJson(dateKey(wallClock())),
+      });
+    } on FileSystemException catch (error) {
+      _log('Cannot save programs.json: $error');
     }
   }
 

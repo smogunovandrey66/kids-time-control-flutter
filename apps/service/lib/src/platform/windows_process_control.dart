@@ -62,6 +62,7 @@ final class WindowsProcessControl implements ProcessControl {
         pid: pid,
         exePath: exePath,
         commandLine: _commandLine(handle) ?? '',
+        sessionId: _sessionId(pid),
       );
     });
   }
@@ -78,6 +79,11 @@ final class WindowsProcessControl implements ProcessControl {
       return null;
     }
     return buffer.toDartString(length: size.value);
+  });
+
+  static int? _sessionId(int pid) => using((arena) {
+    final session = arena<Uint32>();
+    return ProcessIdToSessionId(pid, session).value ? session.value : null;
   });
 
   static String? _commandLine(HANDLE handle) => using((arena) {

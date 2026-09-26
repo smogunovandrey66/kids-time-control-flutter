@@ -72,9 +72,11 @@ final class AgentServer implements LoginBroker {
 
   void _handle(_Agent agent, AgentMessage message) {
     switch (message) {
-      case AgentHello(:final sessionId, :final version):
+      case AgentHello(:final sessionId, :final version, :final userIsAdmin):
         final first = agent.sessionId == null;
-        agent.sessionId = sessionId;
+        agent
+          ..sessionId = sessionId
+          ..userIsAdmin = userIsAdmin;
         if (!first) return;
         _log('Tray agent $version connected (Windows session $sessionId).');
         agent.send(_status);
@@ -102,6 +104,10 @@ final class AgentServer implements LoginBroker {
       if (pending != null && !pending.isCompleted) pending.complete(null);
     }
   }
+
+  /// Whether the Windows user at the screen is an administrator, as told by
+  /// their agent; `null` without an agent.
+  bool? get activeUserIsAdmin => _target()?.userIsAdmin;
 
   _Agent? _target() {
     final ready = [
@@ -191,6 +197,7 @@ final class _Agent {
 
   final Socket socket;
   int? sessionId;
+  bool userIsAdmin = false;
   final questions = <int>{};
 
   void send(AgentMessage message) {

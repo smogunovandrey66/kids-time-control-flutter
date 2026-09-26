@@ -11,10 +11,17 @@ final class TestAgent {
     decodeAgentMessages(_socket).listen(_messages.add);
   }
 
-  static Future<TestAgent> connect(AgentServer server, int sessionId) async {
-    final agent = TestAgent._(
-      await Socket.connect(InternetAddress.loopbackIPv4, server.port),
-    )..send(AgentHello(sessionId: sessionId, version: 'test'));
+  static Future<TestAgent> connect(
+    AgentServer server,
+    int sessionId, {
+    bool admin = false,
+  }) async {
+    final agent =
+        TestAgent._(
+          await Socket.connect(InternetAddress.loopbackIPv4, server.port),
+        )..send(
+          AgentHello(sessionId: sessionId, version: 'test', userIsAdmin: admin),
+        );
     return agent;
   }
 
@@ -159,5 +166,18 @@ void main() {
     expect(logouts, 0);
     expect(server.agentCount, 0);
     await stranger.close();
+  });
+
+  test('tells whether the user at the screen is an administrator', () async {
+    expect(server.activeUserIsAdmin, isNull, reason: 'no agent');
+    final child = await TestAgent.connect(server, 1);
+    final parent = await TestAgent.connect(server, 2, admin: true);
+    await connected(2);
+
+    expect(server.activeUserIsAdmin, isFalse);
+    activeSession = 2;
+    expect(server.activeUserIsAdmin, isTrue);
+    await child.close();
+    await parent.close();
   });
 }

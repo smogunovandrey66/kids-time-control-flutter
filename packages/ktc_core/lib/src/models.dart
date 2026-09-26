@@ -178,9 +178,14 @@ final class ProcessInfo {
     required this.pid,
     required this.exePath,
     this.commandLine = '',
+    this.sessionId,
   });
 
   final int pid;
   final String exePath;
   final String commandLine;
+
+  /// Windows session of the process: 0 for services, 1+ for logged-on users;
+  /// `null` if unknown.
+  final int? sessionId;
 }

@@ -135,6 +135,59 @@ void main() {
       expect(app.exeName, isNull);
     });
 
+    testWidgets('a game is picked from the programs seen on the PC', (
+      tester,
+    ) async {
+      families.devices['pc'] = const Device(
+        id: 'pc',
+        name: 'Home PC',
+        appVersion: '0.1.0',
+        lastSeen: null,
+        programs: [
+          SeenProgram(
+            exePath: r'D:\Games\Tetris\Tetris.exe',
+            seconds: 5400,
+            lastSeen: '2026-09-28',
+          ),
+        ],
+      );
+      await pump(tester);
+      await tester.tap(find.text('Games'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pick from programs on the PC'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('1:30 in 2 weeks · Home PC'), findsOneWidget);
+      await tester.tap(find.text('Tetris'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(r'Found on the PC: D:\Games\Tetris\Tetris.exe'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      final app = families.apps.values.single;
+      expect((app.name, app.exeName), ('Tetris', 'Tetris.exe'));
+      expect(find.textContaining('Already a game: Tetris'), findsOneWidget);
+    });
+
+    testWidgets('warns when children use an administrator account', (
+      tester,
+    ) async {
+      families.devices['pc'] = Device(
+        id: 'pc',
+        name: 'Home PC',
+        appVersion: '0.1.0',
+        lastSeen: DateTime(2026, 9, 28, 18),
+        userIsAdmin: true,
+      );
+      await pump(tester);
+      await tester.tap(find.text('Computers'));
+      await tester.pumpAndSettle();
+      expect(find.text('Children can turn off the control'), findsOneWidget);
+    });
+
     testWidgets('pairs a computer by code', (tester) async {
       families.pairingRequests['K7QM4XP2'] = 'pc-uid';
       await pump(tester);

@@ -4,12 +4,62 @@
   "title": "Device",
   "description": "families/{familyId}/devices/{deviceId}: a paired PC.",
   "type": "object",
-  "required": ["name", "appVersion", "lastSeen"],
+  "required": [
+    "name",
+    "appVersion",
+    "lastSeen"
+  ],
   "additionalProperties": false,
   "properties": {
-    "name": { "type": "string" },
-    "appVersion": { "type": "string" },
-    "lastSeen": { "type": "string", "format": "date-time" },
-    "activeChildId": { "type": ["string", "null"] }
+    "name": {
+      "type": "string"
+    },
+    "appVersion": {
+      "type": "string"
+    },
+    "lastSeen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "activeChildId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "userIsAdmin": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "The Windows user at the screen is an administrator (children could turn control off). null: unknown, no tray agent."
+    },
+    "programs": {
+      "type": "array",
+      "maxItems": 50,
+      "description": "Programs recently run by users of the PC, most used first; the parent picks games from them.",
+      "items": {
+        "type": "object",
+        "required": [
+          "exePath",
+          "seconds",
+          "lastSeen"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "exePath": {
+            "type": "string"
+          },
+          "seconds": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lastSeen": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        }
+      }
+    }
   }
 }

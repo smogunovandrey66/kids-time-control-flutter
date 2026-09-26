@@ -1,6 +1,8 @@
 /// Firestore documents of the cloud part (stage 2). Schemas: `shared/schema`.
 library;
 
+import 'models.dart';
+
 final class Family {
   const Family({
     required this.id,
@@ -41,6 +43,8 @@ final class Device {
     required this.appVersion,
     required this.lastSeen,
     this.activeChildId,
+    this.userIsAdmin,
+    this.programs = const [],
   });
 
   factory Device.fromJson(String id, Map<String, Object?> json) => Device(
@@ -49,6 +53,11 @@ final class Device {
     appVersion: json['appVersion'] as String? ?? '',
     lastSeen: DateTime.tryParse(json['lastSeen'] as String? ?? ''),
     activeChildId: json['activeChildId'] as String?,
+    userIsAdmin: json['userIsAdmin'] as bool?,
+    programs: [
+      for (final program in json['programs'] as List<Object?>? ?? const [])
+        SeenProgram.fromJson(program! as Map<String, Object?>),
+    ],
   );
 
   final String id;
@@ -58,6 +67,14 @@ final class Device {
   /// `null` until the PC reports for the first time.
   final DateTime? lastSeen;
   final String? activeChildId;
+
+  /// The Windows user at the screen is an administrator (children could turn
+  /// the control off); `null` if unknown (no tray agent).
+  final bool? userIsAdmin;
+
+  /// Programs recently run on the PC, most used first: the parent picks games
+  /// from them.
+  final List<SeenProgram> programs;
 
   /// The PC reports every 5 minutes; a longer silence means it is off or cut off.
   bool isOnline(DateTime now) =>
@@ -69,6 +86,52 @@ final class Device {
     'appVersion': appVersion,
     'lastSeen': lastSeen?.toUtc().toIso8601String() ?? '',
     'activeChildId': activeChildId,
+    'userIsAdmin': userIsAdmin,
+    'programs': [for (final program in programs) program.toJson()],
+  };
+}
+
+/// A program run by a user of the PC (not by Windows itself).
+final class SeenProgram {
+  const SeenProgram({
+    required this.exePath,
+    required this.seconds,
+    required this.lastSeen,
+  });
+
+  factory SeenProgram.fromJson(Map<String, Object?> json) => SeenProgram(
+    exePath: json['exePath']! as String,
+    seconds: (json['seconds']! as num).toInt(),
+    lastSeen: json['lastSeen']! as String,
+  );
+
+  final String exePath;
+
+  /// How long it ran recently (about the last two weeks).
+  final int seconds;
+
+  /// Day it last ran, [dateKey] format.
+  final String lastSeen;
+
+  String get fileName {
+    final index = exePath.lastIndexOf(RegExp(r'[\\/]'));
+    return index < 0 ? exePath : exePath.substring(index + 1);
+  }
+
+  /// A starting point for a game rule: the name from the file name, matched by
+  /// the exe name.
+  AppRule suggestRule(String id) {
+    final base = fileName.replaceFirst(
+      RegExp(r'\.exe$', caseSensitive: false),
+      '',
+    );
+    return AppRule(id: id, name: base, exeName: fileName);
+  }
+
+  Map<String, Object?> toJson() => {
+    'exePath': exePath,
+    'seconds': seconds,
+    'lastSeen': lastSeen,
   };
 }
 

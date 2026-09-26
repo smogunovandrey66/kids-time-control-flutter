@@ -19,6 +19,7 @@ class AgentController extends ChangeNotifier {
   AgentController({
     required Future<AgentChannel> Function() connect,
     required this.sessionId,
+    this.userIsAdmin = false,
     this.version = '',
     this.retry = const Duration(seconds: 3),
     this.noticeDuration = const Duration(seconds: 10),
@@ -26,6 +27,7 @@ class AgentController extends ChangeNotifier {
 
   final Future<AgentChannel> Function() _connect;
   final int sessionId;
+  final bool userIsAdmin;
   final String version;
   final Duration retry;
   final Duration noticeDuration;
@@ -63,7 +65,13 @@ class AgentController extends ChangeNotifier {
         onError: (Object _) => _lost(),
         onDone: _lost,
       );
-      channel.send(AgentHello(sessionId: sessionId, version: version));
+      channel.send(
+        AgentHello(
+          sessionId: sessionId,
+          version: version,
+          userIsAdmin: userIsAdmin,
+        ),
+      );
       notifyListeners();
     } on Object {
       _scheduleRetry();

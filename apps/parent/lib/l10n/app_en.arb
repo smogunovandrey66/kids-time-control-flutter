@@ -100,5 +100,44 @@
         "type": "String"
       }
     }
+  },
+  "pickFromPc": "Pick from programs on the PC",
+  "pickFromPcHint": "What ran on your computers in the last two weeks, most used first",
+  "programsEmpty": "Nothing yet. The list fills in as the PC is used (updated every 5 minutes).",
+  "programUsage": "{time} in 2 weeks · {devices}",
+  "@programUsage": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "devices": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyGame": "Already a game: {name}",
+  "@alreadyGame": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "foundOnPc": "Found on the PC: {path}",
+  "@foundOnPc": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "adminWarningTitle": "Children can turn off the control",
+  "adminWarning": "On {device}, the Windows account at the screen is an administrator. Create a standard (non-administrator) account for the children and keep the administrator password to yourself.",
+  "@adminWarning": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
   }
 }

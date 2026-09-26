@@ -8,6 +8,7 @@ export 'src/commands/cli.dart' show CliContext, appVersion, buildCli;
 export 'src/engine/agent_server.dart';
 export 'src/engine/console_login_broker.dart';
 export 'src/engine/login_broker.dart';
+export 'src/engine/program_catalog.dart';
 export 'src/engine/service_engine.dart';
 export 'src/engine/service_runner.dart';
 export 'src/game_monitor.dart';

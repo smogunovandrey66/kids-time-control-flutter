@@ -25,6 +25,7 @@ sealed class AgentMessage {
         'hello' => AgentHello(
           sessionId: json['sessionId']! as int,
           version: json['version'] as String? ?? '',
+          userIsAdmin: json['userIsAdmin'] as bool? ?? false,
         ),
         'login' => LoginRequest(
           id: json['id']! as int,
@@ -65,16 +66,25 @@ sealed class AgentMessage {
 
 /// Agent → service, first message: which Windows session the agent runs in.
 final class AgentHello extends AgentMessage {
-  const AgentHello({required this.sessionId, this.version = ''});
+  const AgentHello({
+    required this.sessionId,
+    this.version = '',
+    this.userIsAdmin = false,
+  });
 
   final int sessionId;
   final String version;
+
+  /// The Windows user of this session is an administrator: children using it
+  /// could stop the service. Reported to the parent as a warning.
+  final bool userIsAdmin;
 
   @override
   Map<String, Object?> toJson() => {
     'type': 'hello',
     'sessionId': sessionId,
     'version': version,
+    'userIsAdmin': userIsAdmin,
   };
 }
 

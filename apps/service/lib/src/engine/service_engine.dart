@@ -5,6 +5,7 @@ import 'package:ktc_core/ktc_core.dart';
 import '../platform/process_control.dart';
 import '../storage/data_dir.dart';
 import 'login_broker.dart';
+import 'program_catalog.dart';
 
 /// The heart of the Windows service: who is playing, how long, and what to close.
 ///
@@ -36,6 +37,7 @@ final class ServiceEngine {
     this.maxFailures = 5,
     this.lockout = const Duration(minutes: 5),
     bool Function()? screenLocked,
+    this.catalog,
     void Function(String message)? log,
   }) : _processes = processes,
        _screenLocked = screenLocked ?? (() => false),
@@ -54,6 +56,9 @@ final class ServiceEngine {
   final Duration Function() _monotonicNow;
   final bool Function() _screenLocked;
   final void Function(String message) _log;
+
+  /// Records which programs run, for the parent's list of candidates.
+  final ProgramCatalog? catalog;
 
   final Duration idleTimeout;
   final Duration closeGrace;
@@ -110,8 +115,10 @@ final class ServiceEngine {
 
   void tick(Duration elapsed) {
     final now = _monotonicNow();
+    final processes = _processes.list();
+    catalog?.observe(processes, elapsed, dateKey(_wallClock()));
     final running = [
-      for (final process in _processes.list())
+      for (final process in processes)
         if (_matcher.match(process) case final app?)
           (pid: process.pid, app: app),
     ];

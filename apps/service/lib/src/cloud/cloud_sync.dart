@@ -128,6 +128,8 @@ final class CloudSync {
   Future<void> reportStatus({
     required String appVersion,
     String? activeChildId,
+    bool? userIsAdmin,
+    List<SeenProgram> programs = const [],
     DateTime? now,
   }) async {
     final session = await this.session();
@@ -140,6 +142,8 @@ final class CloudSync {
         appVersion: appVersion,
         lastSeen: now ?? DateTime.now(),
         activeChildId: activeChildId,
+        userIsAdmin: userIsAdmin,
+        programs: programs,
       ).toJson(),
     );
   }

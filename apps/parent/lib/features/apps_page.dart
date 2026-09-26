@@ -4,11 +4,17 @@ import 'package:ktc_core/ktc_core.dart';
 
 import '../data/providers.dart';
 import '../l10n/l10n.dart';
+import '../logic/programs.dart';
+import '../logic/stats.dart';
 import 'widgets.dart';
 
 void openAppEditor(BuildContext context, [AppRule? app]) => Navigator.of(
   context,
 ).push(MaterialPageRoute<void>(builder: (_) => AppEditPage(app: app)));
+
+void openProgramPicker(BuildContext context) => Navigator.of(
+  context,
+).push(MaterialPageRoute<void>(builder: (_) => const ProgramPickerPage()));
 
 String describeMatch(AppRule app) => [
   ?app.exeName,
@@ -23,12 +29,27 @@ class AppsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final pick = ListTile(
+      leading: const Icon(Icons.manage_search),
+      title: Text(l10n.pickFromPc),
+      subtitle: Text(l10n.pickFromPcHint),
+      onTap: () => openProgramPicker(context),
+    );
     return switch (ref.watch(appsProvider)) {
-      AsyncData(value: final list) when list.isEmpty => EmptyHint(
-        l10n.gamesEmpty,
+      AsyncData(value: final list) when list.isEmpty => ListView(
+        children: [
+          pick,
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(l10n.gamesEmpty, textAlign: TextAlign.center),
+          ),
+        ],
       ),
       AsyncData(value: final list) => ListView(
         children: [
+          pick,
+          const Divider(),
           for (final app in list)
             ListTile(
               leading: const Icon(Icons.sports_esports),
@@ -45,22 +66,30 @@ class AppsPage extends ConsumerWidget {
 }
 
 class AppEditPage extends ConsumerStatefulWidget {
-  const AppEditPage({this.app, super.key});
+  const AppEditPage({this.app, this.suggestion, this.seenPath, super.key});
 
+  /// The rule being edited; `null` for a new one.
   final AppRule? app;
+
+  /// Initial values for a new rule (from a program seen on the PC).
+  final AppRule? suggestion;
+
+  /// Where that program was found, shown to help fill in the folder.
+  final String? seenPath;
 
   @override
   ConsumerState<AppEditPage> createState() => _AppEditPageState();
 }
 
 class _AppEditPageState extends ConsumerState<AppEditPage> {
-  late final _name = TextEditingController(text: widget.app?.name);
-  late final _exeName = TextEditingController(text: widget.app?.exeName);
-  late final _exePath = TextEditingController(text: widget.app?.exePath);
+  late final _initial = widget.app ?? widget.suggestion;
+  late final _name = TextEditingController(text: _initial?.name);
+  late final _exeName = TextEditingController(text: _initial?.exeName);
+  late final _exePath = TextEditingController(text: _initial?.exePath);
   late final _commandLine = TextEditingController(
-    text: widget.app?.commandLineContains,
+    text: _initial?.commandLineContains,
   );
-  late final _folder = TextEditingController(text: widget.app?.folder);
+  late final _folder = TextEditingController(text: _initial?.folder);
   String? _nameError;
   String? _criteriaError;
 
@@ -169,6 +198,11 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
             ),
           ),
           const SizedBox(height: 16),
+          if (widget.seenPath case final path?)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: SelectableText(l10n.foundOnPc(path)),
+            ),
           Text(l10n.matchHint, style: Theme.of(context).textTheme.bodySmall),
           if (_criteriaError != null)
             Text(
@@ -198,6 +232,68 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
           const SizedBox(height: 24),
           FilledButton(onPressed: _save, child: Text(l10n.save)),
         ],
+      ),
+    );
+  }
+}
+
+class ProgramPickerPage extends ConsumerWidget {
+  const ProgramPickerPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final devices = ref.watch(devicesProvider).value ?? const [];
+    final apps = ref.watch(appsProvider).value ?? const [];
+    final candidates = programCandidates(devices, apps);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.pickFromPc)),
+      body: candidates.isEmpty
+          ? EmptyHint(l10n.programsEmpty)
+          : ListView(
+              children: [
+                for (final candidate in candidates)
+                  _ProgramTile(candidate: candidate),
+              ],
+            ),
+    );
+  }
+}
+
+class _ProgramTile extends StatelessWidget {
+  const _ProgramTile({required this.candidate});
+
+  final ProgramCandidate candidate;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final program = candidate.program;
+    final matched = candidate.matchedBy;
+    final suggestion = program.suggestRule('');
+    return ListTile(
+      leading: Icon(
+        matched == null ? Icons.add_circle_outline : Icons.check_circle,
+        color: matched == null ? null : Theme.of(context).colorScheme.primary,
+      ),
+      title: Text(suggestion.name),
+      subtitle: Text(
+        [
+          if (matched != null) l10n.alreadyGame(matched.name),
+          l10n.programUsage(
+            formatHoursMinutes(Duration(seconds: program.seconds)),
+            candidate.deviceNames.join(', '),
+          ),
+          program.exePath,
+        ].join('\n'),
+      ),
+      isThreeLine: true,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => matched != null
+              ? AppEditPage(app: matched, seenPath: program.exePath)
+              : AppEditPage(suggestion: suggestion, seenPath: program.exePath),
+        ),
       ),
     );
   }

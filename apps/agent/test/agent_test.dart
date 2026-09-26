@@ -37,6 +37,7 @@ void main() {
     serviceUp = true;
     controller = AgentController(
       sessionId: 3,
+      userIsAdmin: true,
       version: 'test',
       connect: () async {
         if (!serviceUp) throw Exception('connection refused');
@@ -67,7 +68,8 @@ void main() {
   testWidgets('says hello and shows who is playing', (tester) async {
     final service = await start(tester);
     expect(service.fromAgent.single, isA<AgentHello>());
-    expect((service.fromAgent.single as AgentHello).sessionId, 3);
+    final hello = service.fromAgent.single as AgentHello;
+    expect((hello.sessionId, hello.userIsAdmin), (3, true));
     expect(find.text('Никто не играет'), findsOneWidget);
 
     await say(

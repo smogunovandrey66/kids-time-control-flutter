@@ -75,6 +75,18 @@ void main() {
     expect(device.isOnline(DateTime.utc(2026, 9, 26, 16, 43)), isTrue);
     expect(device.isOnline(DateTime.utc(2026, 9, 26, 17)), isFalse);
     expect(device.isOnline(DateTime.utc(2026, 9, 26, 16, 50)), isTrue);
+    expect(device.userIsAdmin, isFalse);
+    expect(device.programs.first.fileName, 'RobloxPlayerBeta.exe');
+    expect(
+      device.toJson()['programs'],
+      example('device')['programs'],
+      reason: 'lastSeen differs only in formatting',
+    );
+    final rule = device.programs.first.suggestRule('roblox');
+    expect(
+      (rule.name, rule.exeName),
+      ('RobloxPlayerBeta', 'RobloxPlayerBeta.exe'),
+    );
 
     final usage = example('usage');
     final daily = DailyUsage.fromJson(usage);

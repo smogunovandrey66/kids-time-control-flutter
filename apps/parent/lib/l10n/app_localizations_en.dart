@@ -214,4 +214,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String errorGeneric(String message) {
     return 'Something went wrong: $message';
   }
+
+  @override
+  String get pickFromPc => 'Pick from programs on the PC';
+
+  @override
+  String get pickFromPcHint =>
+      'What ran on your computers in the last two weeks, most used first';
+
+  @override
+  String get programsEmpty =>
+      'Nothing yet. The list fills in as the PC is used (updated every 5 minutes).';
+
+  @override
+  String programUsage(String time, String devices) {
+    return '$time in 2 weeks · $devices';
+  }
+
+  @override
+  String alreadyGame(String name) {
+    return 'Already a game: $name';
+  }
+
+  @override
+  String foundOnPc(String path) {
+    return 'Found on the PC: $path';
+  }
+
+  @override
+  String get adminWarningTitle => 'Children can turn off the control';
+
+  @override
+  String adminWarning(String device) {
+    return 'On $device, the Windows account at the screen is an administrator. Create a standard (non-administrator) account for the children and keep the administrator password to yourself.';
+  }
 }

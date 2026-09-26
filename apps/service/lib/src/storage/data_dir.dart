@@ -9,6 +9,7 @@ import 'package:ktc_core/ktc_core.dart';
 /// <data dir>/config.json            children and games (from the cloud or edited by hand)
 /// <data dir>/cloud.json             Firebase project, anonymous session, family id
 /// <data dir>/usage/<child>_<date>.json
+/// <data dir>/programs.json          programs run on the PC recently (for picking games)
 /// ```
 ///
 /// The service uses `%ProgramData%\KidsTimeControl`, writable only by SYSTEM and administrators.
@@ -24,6 +25,8 @@ final class DataDir {
   File get configFile => File('$path/config.json');
 
   File get cloudFile => File('$path/cloud.json');
+
+  File get programsFile => File('$path/programs.json');
 
   Directory get usageDir => Directory('$path/usage');
 

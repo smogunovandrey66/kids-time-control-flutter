@@ -9,6 +9,7 @@ import '../cloud/firebase_rest.dart';
 import '../engine/agent_server.dart';
 import '../engine/console_login_broker.dart';
 import '../engine/login_broker.dart';
+import '../engine/program_catalog.dart';
 import '../engine/service_engine.dart';
 import '../engine/service_runner.dart';
 import '../storage/data_dir.dart';
@@ -60,6 +61,16 @@ final class ServiceCommand extends Command<int> {
       );
     }
 
+    final catalog = ProgramCatalog();
+    if (dir.readJson(dir.programsFile)?['programs']
+        case final List<Object?> list) {
+      try {
+        catalog.load(list);
+      } on Object catch (error) {
+        _log('Ignoring a damaged programs.json: $error');
+      }
+    }
+
     late final ServiceEngine engine;
     AgentServer? agents;
     LoginBroker broker;
@@ -93,6 +104,7 @@ final class ServiceCommand extends Command<int> {
           ? const LocalConfig(children: [], apps: [])
           : LocalConfig.fromJson(configJson),
       screenLocked: _context.sessionState.isLocked,
+      catalog: catalog,
       log: _log,
     );
 
@@ -124,6 +136,8 @@ final class ServiceCommand extends Command<int> {
         engine.activeChildName,
         _roundUpToMinutes(engine.remaining),
       ),
+      catalog: catalog,
+      userIsAdmin: () => agents?.activeUserIsAdmin,
       log: _log,
     );
     unawaited(_context.stopRequested?.then((_) => runner.stop()));

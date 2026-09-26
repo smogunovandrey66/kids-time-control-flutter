@@ -214,4 +214,38 @@ class AppLocalizationsRu extends AppLocalizations {
   String errorGeneric(String message) {
     return 'Что-то пошло не так: $message';
   }
+
+  @override
+  String get pickFromPc => 'Выбрать из программ на ПК';
+
+  @override
+  String get pickFromPcHint =>
+      'Что запускалось на компьютерах за две недели, сначала самое частое';
+
+  @override
+  String get programsEmpty =>
+      'Пока пусто. Список заполнится, когда ПК поработает (обновляется раз в 5 минут).';
+
+  @override
+  String programUsage(String time, String devices) {
+    return '$time за 2 недели · $devices';
+  }
+
+  @override
+  String alreadyGame(String name) {
+    return 'Уже игра: $name';
+  }
+
+  @override
+  String foundOnPc(String path) {
+    return 'Найдено на ПК: $path';
+  }
+
+  @override
+  String get adminWarningTitle => 'Дети могут отключить контроль';
+
+  @override
+  String adminWarning(String device) {
+    return 'На ПК «$device» у экрана учётная запись администратора. Создайте детям обычную учётную запись (не администратора), а пароль администратора оставьте себе.';
+  }
 }

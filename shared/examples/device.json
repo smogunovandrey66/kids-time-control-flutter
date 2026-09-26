@@ -2,5 +2,18 @@
   "name": "Домашний ПК",
   "appVersion": "0.1.0",
   "lastSeen": "2026-09-26T16:42:00Z",
-  "activeChildId": "ivan"
+  "activeChildId": "ivan",
+  "userIsAdmin": false,
+  "programs": [
+    {
+      "exePath": "C:\\Users\\Ivan\\AppData\\Local\\Roblox\\Versions\\version-5f1a\\RobloxPlayerBeta.exe",
+      "seconds": 12600,
+      "lastSeen": "2026-09-26"
+    },
+    {
+      "exePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "seconds": 7200,
+      "lastSeen": "2026-09-26"
+    }
+  ]
 }

@@ -95,7 +95,18 @@ void main() {
           apps: {'minecraft': 600},
         ),
       ]);
-      await pc.reportStatus(appVersion: appVersion, activeChildId: 'ivan');
+      await pc.reportStatus(
+        appVersion: appVersion,
+        activeChildId: 'ivan',
+        userIsAdmin: true,
+        programs: const [
+          SeenProgram(
+            exePath: r'C:\Games\Game.exe',
+            seconds: 3600,
+            lastSeen: '2026-09-28',
+          ),
+        ],
+      );
 
       final usage = await client.getDocument(
         parent,
@@ -107,6 +118,9 @@ void main() {
         'families/$familyId/devices/${pc.state.uid}',
       );
       expect(device!['activeChildId'], 'ivan');
+      final seen = Device.fromJson('pc', device);
+      expect(seen.userIsAdmin, isTrue);
+      expect(seen.programs.single.exePath, r'C:\Games\Game.exe');
 
       // The PC must not be able to raise a limit.
       final session = await pc.session();

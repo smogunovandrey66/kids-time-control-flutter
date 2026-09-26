@@ -63,6 +63,27 @@ if (Test-Path $agent) {
 }
 
 Write-Host "Kids Time Control is installed in $InstallDir and running."
+
+# Children must use a standard account: an administrator can stop the service.
+try {
+  $admins = @(Get-LocalGroupMember -SID 'S-1-5-32-544' -ErrorAction Stop |
+    ForEach-Object { ($_.Name -split '\\')[-1] })
+  $users = @(Get-LocalUser | Where-Object {
+    $_.Enabled -and $_.SID.Value -notmatch '-(500|501|503|504)$'
+  })
+  $standard = @($users | Where-Object { $admins -notcontains $_.Name })
+  Write-Host ''
+  Write-Host "Administrators: $($admins -join ', ')"
+  if ($standard.Count -eq 0) {
+    Write-Warning ('Every account on this PC is an administrator. Children using such an ' +
+      'account can turn Kids Time Control off. Create a standard account for the children ' +
+      '(Settings > Accounts > Other users) and keep the administrator password to yourself.')
+  } else {
+    Write-Host "Standard accounts (for the children): $(($standard | ForEach-Object Name) -join ', ')"
+  }
+} catch {
+  Write-Warning "Could not check the accounts: $_"
+}
 Write-Host "Data and logs: $dataDir"
 Write-Host "Connect this PC to your family (in this administrator window):"
 Write-Host "  & '$InstallDir\ktc.exe' pair --api-key <Web API Key> --project-id <project id> --name 'Home PC'"

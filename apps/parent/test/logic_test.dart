@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ktc_core/ktc_core.dart';
 import 'package:ktc_parent/logic/child_form.dart';
+import 'package:ktc_parent/logic/programs.dart';
 import 'package:ktc_parent/logic/stats.dart';
 
 import 'fakes.dart';
@@ -95,6 +96,53 @@ void main() {
     test('the real hash verifies', () async {
       final hash = await hashPinInBackground('4321', iterations: 1000);
       expect(verifyPin('4321', hash), isTrue);
+    });
+  });
+
+  group('programs seen on the PCs', () {
+    const roblox = r'C:\Users\Ivan\AppData\Local\Roblox\RobloxPlayerBeta.exe';
+    Device pc(String name, List<SeenProgram> programs) => Device(
+      id: name,
+      name: name,
+      appVersion: '',
+      lastSeen: null,
+      programs: programs,
+    );
+
+    test('merged across PCs, most used first, marked when already a game', () {
+      final candidates = programCandidates(
+        [
+          pc('Home PC', const [
+            SeenProgram(exePath: roblox, seconds: 600, lastSeen: '2026-09-20'),
+            SeenProgram(
+              exePath: r'C:\Games\Tetris.exe',
+              seconds: 900,
+              lastSeen: '2026-09-28',
+            ),
+          ]),
+          pc('Laptop', [
+            SeenProgram(
+              exePath: roblox.toUpperCase(),
+              seconds: 600,
+              lastSeen: '2026-09-28',
+            ),
+          ]),
+        ],
+        const [
+          AppRule(
+            id: 'roblox',
+            name: 'Roblox',
+            exeName: 'robloxplayerbeta.exe',
+          ),
+        ],
+      );
+
+      expect(candidates.map((c) => c.program.seconds), [1200, 900]);
+      final first = candidates.first;
+      expect(first.program.lastSeen, '2026-09-28');
+      expect(first.deviceNames, ['Home PC', 'Laptop']);
+      expect(first.matchedBy?.id, 'roblox');
+      expect(candidates.last.matchedBy, isNull);
     });
   });
 }
