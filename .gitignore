@@ -28,3 +28,6 @@ ui-debug.log
 
 # Per-machine flutterfire configuration (project IDs, app IDs)
 apps/parent/firebase.json
+
+# Firebase Hosting build output (copied from apps/parent/build/web)
+firebase/hosting-build/
