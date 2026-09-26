@@ -14,7 +14,10 @@ void main() {
       LoginRequest(
         id: 7,
         appName: 'Minecraft',
-        children: [(id: 'ivan', name: 'Иван'), (id: 'marina', name: 'Марина')],
+        children: [
+          (id: 'ivan', name: 'Иван', remainingSeconds: 600),
+          (id: 'marina', name: 'Марина', remainingSeconds: null),
+        ],
         error: LoginError.wrongPin,
       ),
       LoginReply(id: 7, childId: 'ivan', pin: '1234'),
@@ -35,6 +38,8 @@ void main() {
     );
     final request = decoded[1] as LoginRequest;
     expect(request.children.last.name, 'Марина');
+    expect(request.children.first.remainingSeconds, 600);
+    expect(request.children.last.remainingSeconds, isNull);
     expect(request.error, LoginError.wrongPin);
     expect((decoded[3] as LoginReply).cancelled, isTrue);
   });

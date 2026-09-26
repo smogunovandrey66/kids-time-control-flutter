@@ -164,6 +164,13 @@ void main() {
         find.text(r'Found on the PC: D:\Games\Tetris\Tetris.exe'),
         findsOneWidget,
       );
+      // The quick-fill chips from the seen path pushed Save below the fold.
+      await tester.dragUntilVisible(
+        find.text('Save'),
+        find.byType(ListView),
+        const Offset(0, -120),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 

@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ktc_core/ktc_core.dart';
 
 import 'repositories.dart';
@@ -21,8 +24,23 @@ final class FirebaseAuthRepository implements AuthRepository {
   );
 
   @override
-  Future<void> signInWithGoogle() =>
-      _auth.signInWithProvider(GoogleAuthProvider());
+  Future<void> signInWithGoogle() async {
+    // The browser IDP flow (signInWithProvider) breaks on Android when the
+    // browser partitions storage, so use the native Google account picker.
+    if (Platform.isAndroid) {
+      final google = GoogleSignIn(scopes: ['email']);
+      final account = await google.signIn();
+      if (account == null) return; // cancelled
+      final auth = await account.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: auth.accessToken,
+        idToken: auth.idToken,
+      );
+      await _auth.signInWithCredential(credential);
+    } else {
+      await _auth.signInWithProvider(GoogleAuthProvider());
+    }
+  }
 
   @override
   Future<void> signOut() => _auth.signOut();

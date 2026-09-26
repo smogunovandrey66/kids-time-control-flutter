@@ -139,5 +139,30 @@
         "type": "String"
       }
     }
+  },
+  "lastRun": "Last run: {date}",
+  "@lastRun": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "fillExeName": "File name → exe name: {name}",
+  "@fillExeName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fillExePath": "Full path → exe path",
+  "fillFolder": "Folder → folder: {folder}",
+  "@fillFolder": {
+    "placeholders": {
+      "folder": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -15,7 +15,7 @@ final class FakeBroker implements LoginBroker {
 
   @override
   Future<LoginAnswer?> askLogin({
-    required List<Child> children,
+    required List<LoginChoice> children,
     required String appName,
     LoginError? previousError,
   }) async {

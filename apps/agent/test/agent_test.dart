@@ -29,7 +29,10 @@ void main() {
   const prompt = LoginRequest(
     id: 1,
     appName: 'Minecraft',
-    children: [(id: 'ivan', name: 'Иван'), (id: 'marina', name: 'Марина')],
+    children: [
+      (id: 'ivan', name: 'Иван', remainingSeconds: 600),
+      (id: 'marina', name: 'Марина', remainingSeconds: 0),
+    ],
   );
 
   setUp(() {
@@ -110,7 +113,7 @@ void main() {
       const LoginRequest(
         id: 2,
         appName: 'Roblox',
-        children: [(id: 'ivan', name: 'Иван')],
+        children: [(id: 'ivan', name: 'Иван', remainingSeconds: null)],
         error: LoginError.wrongPin,
       ),
     );

@@ -198,11 +198,51 @@ class _AppEditPageState extends ConsumerState<AppEditPage> {
             ),
           ),
           const SizedBox(height: 16),
-          if (widget.seenPath case final path?)
+          if (widget.seenPath case final path?) ...[
             Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: 4),
               child: SelectableText(l10n.foundOnPc(path)),
             ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ActionChip(
+                    label: Text(
+                      l10n.fillExeName(
+                        path.substring(path.lastIndexOf('\\') + 1),
+                      ),
+                    ),
+                    onPressed: () => setState(() {
+                      _exeName.text = path.substring(
+                        path.lastIndexOf('\\') + 1,
+                      );
+                    }),
+                  ),
+                  ActionChip(
+                    label: Text(l10n.fillExePath),
+                    onPressed: () => setState(() => _exePath.text = path),
+                  ),
+                  if (path.contains('\\'))
+                    Builder(
+                      builder: (context) {
+                        final folder = path.substring(
+                          0,
+                          path.lastIndexOf('\\'),
+                        );
+                        return ActionChip(
+                          label: Text(l10n.fillFolder(folder)),
+                          onPressed: () =>
+                              setState(() => _folder.text = folder),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ],
           Text(l10n.matchHint, style: Theme.of(context).textTheme.bodySmall),
           if (_criteriaError != null)
             Text(
@@ -265,6 +305,13 @@ class _ProgramTile extends StatelessWidget {
 
   final ProgramCandidate candidate;
 
+  /// `2026-09-26` → `26.09`: the catalog covers about two weeks.
+  static String _shortDay(String lastSeen) {
+    final parts = lastSeen.split('-');
+    if (parts.length != 3) return lastSeen;
+    return '${parts[2]}.${parts[1]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -284,6 +331,7 @@ class _ProgramTile extends StatelessWidget {
             formatHoursMinutes(Duration(seconds: program.seconds)),
             candidate.deviceNames.join(', '),
           ),
+          l10n.lastRun(_shortDay(program.lastSeen)),
           program.exePath,
         ].join('\n'),
       ),

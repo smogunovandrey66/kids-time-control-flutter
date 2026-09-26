@@ -240,7 +240,12 @@ final class ServiceEngine {
     for (var attempt = 0; attempt < 3; attempt++) {
       final children = [
         for (final child in _config.children)
-          if (!child.archived) child,
+          if (!child.archived)
+            (
+              id: child.id,
+              name: child.name,
+              remainingSeconds: _remainingToday(child).inSeconds,
+            ),
       ];
       final answer = await _broker.askLogin(
         children: children,
@@ -290,6 +295,12 @@ final class ServiceEngine {
     }
     _suspended.clear();
   }
+
+  /// Time left for [child] today: the day's limit minus what was played.
+  Duration _remainingToday(Child child) => _trackerFor(
+    child,
+    _dir.loadUsage(child.id, dateKey(_wallClock())),
+  ).remaining;
 
   void _close(int pid) {
     _closing[pid] = _monotonicNow();

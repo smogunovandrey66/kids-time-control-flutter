@@ -17,6 +17,7 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^3.4.3
   flutter_timezone: ^5.1.0
+  google_sign_in: 6.2.1
   intl: ^0.20.3
   ktc_core:
     path: ../../packages/ktc_core

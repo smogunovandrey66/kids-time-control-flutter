@@ -248,4 +248,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String adminWarning(String device) {
     return 'На ПК «$device» у экрана учётная запись администратора. Создайте детям обычную учётную запись (не администратора), а пароль администратора оставьте себе.';
   }
+
+  @override
+  String lastRun(String date) {
+    return 'Последний запуск: $date';
+  }
+
+  @override
+  String fillExeName(String name) {
+    return 'Имя файла → exe name: $name';
+  }
+
+  @override
+  String get fillExePath => 'Полный путь → exe path';
+
+  @override
+  String fillFolder(String folder) {
+    return 'Папка → folder: $folder';
+  }
 }

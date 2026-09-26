@@ -248,4 +248,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String adminWarning(String device) {
     return 'On $device, the Windows account at the screen is an administrator. Create a standard (non-administrator) account for the children and keep the administrator password to yourself.';
   }
+
+  @override
+  String lastRun(String date) {
+    return 'Last run: $date';
+  }
+
+  @override
+  String fillExeName(String name) {
+    return 'File name → exe name: $name';
+  }
+
+  @override
+  String get fillExePath => 'Full path → exe path';
+
+  @override
+  String fillFolder(String folder) {
+    return 'Folder → folder: $folder';
+  }
 }

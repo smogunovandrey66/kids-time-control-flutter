@@ -3,12 +3,15 @@ import 'package:ktc_core/ktc_core.dart';
 /// What the child entered in the "Who is playing?" window.
 typedef LoginAnswer = ({String childId, String pin});
 
+/// One child in the "Who is playing?" list, with today's remaining time.
+typedef LoginChoice = ({String id, String name, int? remainingSeconds});
+
 /// The service's window to the user. [AgentServer] talks to the tray agent;
 /// `ktc service --console` uses the console; tests use a fake.
 abstract interface class LoginBroker {
   /// Asks who is playing [appName]. `null` means cancelled or no agent is available.
   Future<LoginAnswer?> askLogin({
-    required List<Child> children,
+    required List<LoginChoice> children,
     required String appName,
     LoginError? previousError,
   });
@@ -25,7 +28,7 @@ final class NoAgentBroker implements LoginBroker {
 
   @override
   Future<LoginAnswer?> askLogin({
-    required List<Child> children,
+    required List<LoginChoice> children,
     required String appName,
     LoginError? previousError,
   }) async {

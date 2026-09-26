@@ -12,7 +12,7 @@ final class ConsoleLoginBroker implements LoginBroker {
 
   @override
   Future<LoginAnswer?> askLogin({
-    required List<Child> children,
+    required List<LoginChoice> children,
     required String appName,
     LoginError? previousError,
   }) async {
@@ -21,7 +21,10 @@ final class ConsoleLoginBroker implements LoginBroker {
     }
     out.writeln('Who is playing $appName?');
     for (final (index, child) in children.indexed) {
-      out.writeln('  ${index + 1}. ${child.name}');
+      out.writeln(
+        '  ${index + 1}. ${child.name}'
+        '${_remainingSuffix(child.remainingSeconds)}',
+      );
     }
     out.write('Number (empty to cancel): ');
     final choice = int.tryParse(readLine()?.trim() ?? '');
@@ -34,4 +37,11 @@ final class ConsoleLoginBroker implements LoginBroker {
 
   @override
   void notify(Notice notice) => out.writeln('>>> $notice');
+
+  /// ` (4:00 left today)` next to the name; empty when unknown.
+  static String _remainingSuffix(int? seconds) {
+    if (seconds == null) return '';
+    final m = seconds ~/ 60, s = seconds % 60;
+    return ' ($m:${s.toString().padLeft(2, '0')} left today)';
+  }
 }

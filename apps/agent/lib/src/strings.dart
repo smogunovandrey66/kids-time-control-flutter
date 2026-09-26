@@ -22,6 +22,10 @@ sealed class Strings {
   String playing(String childName, int minutes);
   String get logout;
   String minutes(int count);
+
+  /// Subtitle under the child's name in the "Who is playing?" window.
+  /// [seconds] is the time left today; `null` when the service could not tell.
+  String? remainingToday(int? seconds);
 }
 
 final class RussianStrings extends Strings {
@@ -89,6 +93,14 @@ final class RussianStrings extends Strings {
         : 'минут';
     return '$count $word';
   }
+
+  @override
+  String? remainingToday(int? seconds) {
+    if (seconds == null) return null;
+    if (seconds <= 0) return 'На сегодня время закончилось';
+    final m = seconds ~/ 60, s = seconds % 60;
+    return 'Осталось сегодня $m:${s.toString().padLeft(2, '0')}';
+  }
 }
 
 final class EnglishStrings extends Strings {
@@ -143,4 +155,12 @@ final class EnglishStrings extends Strings {
 
   @override
   String minutes(int count) => count == 1 ? '1 minute' : '$count minutes';
+
+  @override
+  String? remainingToday(int? seconds) {
+    if (seconds == null) return null;
+    if (seconds <= 0) return 'No time left today';
+    final m = seconds ~/ 60, s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')} left today';
+  }
 }

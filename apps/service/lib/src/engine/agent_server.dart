@@ -124,7 +124,7 @@ final class AgentServer implements LoginBroker {
 
   @override
   Future<LoginAnswer?> askLogin({
-    required List<Child> children,
+    required List<({String id, String name, int? remainingSeconds})> children,
     required String appName,
     LoginError? previousError,
   }) async {
@@ -151,9 +151,7 @@ final class AgentServer implements LoginBroker {
       LoginRequest(
         id: id,
         appName: appName,
-        children: [
-          for (final child in children) (id: child.id, name: child.name),
-        ],
+        children: children,
         error: previousError,
       ),
     );

@@ -14,8 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // `flutterfire configure` replaces the placeholder; until then explain what to do.
-  // ignore: dead_code, the flag becomes false in generated options.
-  if (DefaultFirebaseOptions.isPlaceholder) {
+  if (DefaultFirebaseOptions.currentPlatform.apiKey == 'placeholder') {
     runApp(const SetupRequiredApp());
     return;
   }

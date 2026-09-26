@@ -40,14 +40,7 @@ void main() {
   late AgentServer server;
   var activeSession = 1;
   var logouts = 0;
-  final children = [
-    const Child(
-      id: 'ivan',
-      name: 'Иван',
-      pinHash: 'x',
-      limits: Limits(weekdaySeconds: 60, weekendSeconds: 60),
-    ),
-  ];
+  final children = [(id: 'ivan', name: 'Иван', remainingSeconds: 60)];
 
   setUp(() async {
     activeSession = 1;
@@ -80,7 +73,11 @@ void main() {
     );
     final request = await agent.next<LoginRequest>();
     expect(request.appName, 'Minecraft');
-    expect(request.children.single, (id: 'ivan', name: 'Иван'));
+    expect(request.children.single, (
+      id: 'ivan',
+      name: 'Иван',
+      remainingSeconds: 60,
+    ));
     expect(request.error, LoginError.wrongPin);
 
     agent.send(LoginReply(id: request.id, childId: 'ivan', pin: '1234'));

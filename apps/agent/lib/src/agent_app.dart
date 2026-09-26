@@ -117,12 +117,26 @@ class _LoginViewState extends State<LoginView> {
           children: [
             for (final child in widget.prompt.children)
               ChoiceChip(
-                label: Text(child.name),
                 selected: _childId == child.id,
                 onSelected: (_) {
                   setState(() => _childId = child.id);
                   _pinFocus.requestFocus();
                 },
+                label: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(child.name),
+                    if (strings.remainingToday(child.remainingSeconds)
+                        case final remaining?)
+                      Text(
+                        remaining,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
               ),
           ],
         ),

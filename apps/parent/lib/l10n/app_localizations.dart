@@ -523,6 +523,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'On {device}, the Windows account at the screen is an administrator. Create a standard (non-administrator) account for the children and keep the administrator password to yourself.'**
   String adminWarning(String device);
+
+  /// No description provided for @lastRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Last run: {date}'**
+  String lastRun(String date);
+
+  /// No description provided for @fillExeName.
+  ///
+  /// In en, this message translates to:
+  /// **'File name → exe name: {name}'**
+  String fillExeName(String name);
+
+  /// No description provided for @fillExePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Full path → exe path'**
+  String get fillExePath;
+
+  /// No description provided for @fillFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder → folder: {folder}'**
+  String fillFolder(String folder);
 }
 
 class _AppLocalizationsDelegate

@@ -34,7 +34,11 @@ sealed class AgentMessage {
             for (final child
                 in (json['children']! as List<Object?>)
                     .cast<Map<String, Object?>>())
-              (id: child['id']! as String, name: child['name']! as String),
+              (
+                id: child['id']! as String,
+                name: child['name']! as String,
+                remainingSeconds: child['remainingSeconds'] as int?,
+              ),
           ],
           error: switch (json['error']) {
             final String name => LoginError.values.asNameMap()[name],
@@ -99,7 +103,9 @@ final class LoginRequest extends AgentMessage {
 
   final int id;
   final String appName;
-  final List<({String id, String name})> children;
+
+  /// Time left today per child (`null` when the service could not tell).
+  final List<({String id, String name, int? remainingSeconds})> children;
 
   /// Why the previous attempt failed, if this is a retry.
   final LoginError? error;
@@ -110,7 +116,12 @@ final class LoginRequest extends AgentMessage {
     'id': id,
     'appName': appName,
     'children': [
-      for (final child in children) {'id': child.id, 'name': child.name},
+      for (final child in children)
+        {
+          'id': child.id,
+          'name': child.name,
+          'remainingSeconds': ?child.remainingSeconds,
+        },
     ],
     'error': error?.name,
   };

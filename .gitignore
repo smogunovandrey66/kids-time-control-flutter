@@ -25,3 +25,6 @@ GoogleService-Info.plist
 .DS_Store
 firebase/node_modules/
 ui-debug.log
+
+# Per-machine flutterfire configuration (project IDs, app IDs)
+apps/parent/firebase.json
