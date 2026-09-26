@@ -27,6 +27,13 @@ final class FakeBroker implements LoginBroker {
   void notify(String message) => notifications.add(message);
 }
 
+/// Minecraft started again: a new process.
+ProcessInfo relaunched(int pid) => ProcessInfo(
+  pid: pid,
+  exePath: minecraft.exePath,
+  commandLine: minecraft.commandLine,
+);
+
 void main() {
   late FakeProcessControl processes;
   late FakeBroker broker;
@@ -43,6 +50,12 @@ void main() {
         pinHash: hashPin('1234', iterations: 1),
         limits: Limits(weekdaySeconds: weekdayMinutes * 60, weekendSeconds: 0),
         bonus: bonus,
+      ),
+      Child(
+        id: 'marina',
+        name: 'Marina',
+        pinHash: hashPin('5678', iterations: 1),
+        limits: const Limits(weekdaySeconds: 3600, weekendSeconds: 0),
       ),
     ],
     apps: const [
@@ -116,7 +129,7 @@ void main() {
     }
     processes.processes.add(minecraft);
     await run(2);
-    processes.processes.add(minecraft);
+    processes.processes.add(relaunched(101));
     await run(2);
 
     expect(broker.prompts, [
@@ -127,7 +140,7 @@ void main() {
     ]);
     // Even the right PIN is rejected while locked.
     broker.answers.add((childId: 'ivan', pin: '1234'));
-    processes.processes.add(minecraft);
+    processes.processes.add(relaunched(102));
     await run(2);
     expect(broker.prompts.last, LoginError.locked);
     expect(engine.activeChildId, isNull);
@@ -166,8 +179,58 @@ void main() {
 
       await run(10);
       expect(processes.terminated, [100]);
+      expect(engine.activeChildId, isNull, reason: 'closing ends the session');
     },
   );
+
+  test('after time is up a sister can log in right away', () async {
+    engine.updateConfig(config(weekdayMinutes: 1));
+    broker.answers.add((childId: 'ivan', pin: '1234'));
+    processes.processes.add(minecraft);
+    await run(2);
+    await run(70); // 60 s of play + 10 s grace
+    expect(processes.terminated, [100]);
+
+    broker.answers.add((childId: 'marina', pin: '5678'));
+    processes.processes.add(relaunched(101));
+    await run(2);
+
+    expect(engine.activeChildId, 'marina');
+    expect(processes.terminated, [100]);
+  });
+
+  test('a game that is slow to exit is not asked about again', () async {
+    processes.slowExit = true;
+    processes.processes.add(minecraft);
+    await run(2); // nobody answers: the game is closed
+    expect(processes.terminated, [100]);
+
+    await run(8);
+    expect(broker.prompts, hasLength(1));
+
+    // Still alive after 10 s: handled again.
+    await run(4);
+    expect(broker.prompts, hasLength(2));
+  });
+
+  test('extra time after time is up restarts the grace period', () async {
+    engine.updateConfig(config(weekdayMinutes: 1));
+    broker.answers.add((childId: 'ivan', pin: '1234'));
+    processes.processes.add(minecraft);
+    await run(2);
+    await run(64); // time is up, 4 s into the grace period
+    engine.updateConfig(
+      config(
+        weekdayMinutes: 1,
+        bonus: const Bonus(date: '2026-09-28', seconds: 60),
+      ),
+    );
+    await run(56); // the rest of the extra minute
+    await run(8);
+    expect(processes.terminated, isEmpty, reason: 'a new grace period');
+    await run(2);
+    expect(processes.terminated, [100]);
+  });
 
   test('the session ends after a while without games', () async {
     broker.answers.add((childId: 'ivan', pin: '1234'));

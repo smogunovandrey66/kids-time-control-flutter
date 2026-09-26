@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -62,8 +64,13 @@ final class AuthSession {
 
 /// Minimal REST client for Firebase Auth (anonymous) and Cloud Firestore.
 final class FirebaseRestClient {
-  FirebaseRestClient(this.endpoints, {http.Client? client})
-    : _http = client ?? http.Client();
+  /// Every request fails with a [TimeoutException] after [timeout], so a
+  /// hanging connection does not stall synchronization forever.
+  FirebaseRestClient(
+    this.endpoints, {
+    http.Client? client,
+    Duration timeout = const Duration(seconds: 30),
+  }) : _http = _TimeoutClient(client ?? http.Client(), timeout);
 
   final FirebaseEndpoints endpoints;
   final http.Client _http;
@@ -288,4 +295,30 @@ final class FirebaseRestClient {
     // Refresh a minute early.
     Duration(seconds: int.parse(expiresIn! as String) - 60),
   );
+}
+
+final class _TimeoutClient extends http.BaseClient {
+  _TimeoutClient(this._inner, this._timeout);
+
+  final http.Client _inner;
+  final Duration _timeout;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final response = await _inner.send(request).timeout(_timeout);
+    final body = await response.stream.toBytes().timeout(_timeout);
+    return http.StreamedResponse(
+      http.ByteStream.fromBytes(body),
+      response.statusCode,
+      contentLength: body.length,
+      request: response.request,
+      headers: response.headers,
+      isRedirect: response.isRedirect,
+      persistentConnection: response.persistentConnection,
+      reasonPhrase: response.reasonPhrase,
+    );
+  }
+
+  @override
+  void close() => _inner.close();
 }

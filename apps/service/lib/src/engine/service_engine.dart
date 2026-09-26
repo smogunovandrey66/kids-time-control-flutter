@@ -18,6 +18,8 @@ import 'login_broker.dart';
 /// 2. During a session time is accounted (once, however many games run),
 ///    usage is saved, warnings are shown; when time is up the games get
 ///    [closeGrace] and are then closed, and new ones are closed immediately.
+///    Closing the games ends the session, so a brother or sister with time
+///    left can log in right away.
 /// 3. The session ends after [idleTimeout] without games.
 final class ServiceEngine {
   ServiceEngine({
@@ -57,6 +59,11 @@ final class ServiceEngine {
   AppMatcher _matcher;
   _Session? _session;
   final _suspended = <int>{};
+
+  /// Processes asked to close: ignored while they shut down, handled again if
+  /// still alive after [_closeTimeout].
+  final _closing = <int, Duration>{};
+  static const _closeTimeout = Duration(seconds: 10);
   Future<void>? _pendingLogin;
   final _failures = <String, ({int count, Duration lastAt})>{};
 
@@ -92,13 +99,22 @@ final class ServiceEngine {
   }
 
   void tick(Duration elapsed) {
-    final games = [
+    final now = _monotonicNow();
+    final running = [
       for (final process in _processes.list())
         if (_matcher.match(process) case final app?)
           (pid: process.pid, app: app),
     ];
-    // Forget suspended processes that are gone.
-    _suspended.retainAll({for (final game in games) game.pid});
+    // Forget processes that are gone.
+    final pids = {for (final game in running) game.pid};
+    _suspended.retainAll(pids);
+    _closing.removeWhere(
+      (pid, since) => !pids.contains(pid) || now - since >= _closeTimeout,
+    );
+    final games = [
+      for (final game in running)
+        if (!_closing.containsKey(game.pid)) game,
+    ];
 
     final session = _session;
     if (session == null) {
@@ -168,16 +184,19 @@ final class ServiceEngine {
         break;
     }
 
-    if (session.tracker.timeUp && games.isNotEmpty) {
+    if (!session.tracker.timeUp) {
+      session.timeUpAt = null; // e.g. extra time from the parent
+    } else if (games.isNotEmpty) {
       session.timeUpAt ??= now;
       if (now - session.timeUpAt! >= closeGrace) {
         for (final game in games) {
-          if (_processes.terminate(game.pid)) {
-            _log(
-              'Time is up for ${session.child.name}: closed ${game.app.name}.',
-            );
-          }
+          _close(game.pid);
+          _log(
+            'Time is up for ${session.child.name}: closed ${game.app.name}.',
+          );
         }
+        _endSession('time is up');
+        return;
       }
     }
 
@@ -237,12 +256,17 @@ final class ServiceEngine {
     }
 
     for (final pid in _suspended) {
-      _processes.terminate(pid);
+      _close(pid);
     }
     if (_suspended.isNotEmpty) {
       _log('Closed ${_suspended.length} game process(es): no login.');
     }
     _suspended.clear();
+  }
+
+  void _close(int pid) {
+    _closing[pid] = _monotonicNow();
+    _processes.terminate(pid);
   }
 
   /// Ends the current session (logout, screen lock, idle timeout).

@@ -12,6 +12,10 @@ import 'service_engine.dart';
 /// Cloud traffic is kept within the free Firestore quota: configuration is
 /// read every [syncInterval], only changed usage is uploaded, and the status
 /// is reported every [statusInterval] or when the active child changes.
+///
+/// Synchronization runs alongside the ticks: a slow or hanging network must
+/// not pause time accounting (a pause longer than [UsageTracker.maxTickGap]
+/// would be free play time).
 final class ServiceRunner {
   ServiceRunner({
     required this.engine,
@@ -42,6 +46,7 @@ final class ServiceRunner {
   Duration? _lastStatus;
   String? _reportedChild;
   var _firstSync = true;
+  Future<void>? _sync;
 
   void stop() => _stopped = true;
 
@@ -53,9 +58,10 @@ final class ServiceRunner {
       engine.tick(now - last);
       last = now;
       if (cloud != null &&
+          _sync == null &&
           (_lastSync == null || now - _lastSync! >= syncInterval)) {
         _lastSync = now;
-        await syncOnce();
+        _sync = syncOnce().whenComplete(() => _sync = null);
       }
     }
     _log('Service stopped.');

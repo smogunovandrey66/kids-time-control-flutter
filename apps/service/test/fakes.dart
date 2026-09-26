@@ -8,14 +8,21 @@ final class FakeProcessControl implements ProcessControl {
   final terminated = <int>[];
   final suspended = <int>[];
   final resumed = <int>[];
+  var listCalls = 0;
+
+  /// Keep terminated processes in the list (a game that takes a while to exit).
+  var slowExit = false;
 
   @override
-  List<ProcessInfo> list() => List.of(processes);
+  List<ProcessInfo> list() {
+    listCalls++;
+    return List.of(processes);
+  }
 
   @override
   bool terminate(int pid) {
     terminated.add(pid);
-    processes.removeWhere((process) => process.pid == pid);
+    if (!slowExit) processes.removeWhere((process) => process.pid == pid);
     return true;
   }
 
