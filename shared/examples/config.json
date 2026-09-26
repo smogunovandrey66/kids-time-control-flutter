@@ -1,0 +1,22 @@
+{
+  "children": {
+    "ivan": {
+      "name": "Иван",
+      "pinHash": "pbkdf2-sha256$10000$a3RjLXRlc3Qtc2FsdA==$LxrtrmK164FUMoBkx/0kVzkUUXAlTlK3MCyFqTb7Tsc=",
+      "limits": { "weekdaySeconds": 3600, "weekendSeconds": 7200 },
+      "archived": false
+    }
+  },
+  "apps": {
+    "minecraft": {
+      "name": "Minecraft (Java Edition)",
+      "match": { "exeName": "javaw.exe", "commandLineContains": "minecraft" },
+      "archived": false
+    },
+    "roblox": {
+      "name": "Roblox",
+      "match": { "exeName": "RobloxPlayerBeta.exe" },
+      "archived": false
+    }
+  }
+}

@@ -38,3 +38,19 @@ jobs:
       - name: Test ktc_core
         working-directory: packages/ktc_core
         run: dart test
+
+      # On Windows this also runs the WinAPI tests against real processes.
+      - name: Test ktc_service
+        working-directory: apps/service
+        run: dart test
+
+      - name: Build ktc.exe
+        if: runner.os == 'Windows'
+        run: dart compile exe apps/service/bin/ktc.dart -o build/ktc.exe
+
+      - name: Upload ktc.exe
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ktc-windows
+          path: build/ktc.exe

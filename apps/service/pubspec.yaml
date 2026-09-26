@@ -1,0 +1,18 @@
+name: ktc_service
+description: Kids Time Control Windows service and the `ktc` command-line tool.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.9.0
+
+executables:
+  ktc: ktc
+dependencies:
+  args: ^2.7.0
+  ffi: ^2.2.0
+  ktc_core:
+    path: ../../packages/ktc_core
+  win32: ^6.4.0
+dev_dependencies:
+  test: ^1.32.0

@@ -49,4 +49,12 @@ void main() {
       isTrue,
     );
   });
+
+  test('config example lists children and games', () {
+    final config = LocalConfig.fromJson(example('config'));
+
+    expect(config.child('ivan')?.name, 'Иван');
+    expect(config.child('nobody'), isNull);
+    expect(config.apps.map((app) => app.id), ['minecraft', 'roblox']);
+  });
 }

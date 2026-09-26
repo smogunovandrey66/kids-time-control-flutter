@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smogunovandrey66/kids-time-control/shared/schema/config.schema.json",
+  "title": "LocalConfig",
+  "description": "config.json on the PC: children and controlled games keyed by id. Stage 1 edits it by hand; stage 2 caches Firestore data in it.",
+  "type": "object",
+  "required": ["children", "apps"],
+  "additionalProperties": false,
+  "properties": {
+    "children": {
+      "type": "object",
+      "additionalProperties": { "$ref": "child.schema.json" }
+    },
+    "apps": {
+      "type": "object",
+      "additionalProperties": { "$ref": "app.schema.json" }
+    }
+  }
+}

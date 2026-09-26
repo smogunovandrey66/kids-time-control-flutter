@@ -3,6 +3,7 @@
 library;
 
 export 'src/app_matcher.dart';
+export 'src/local_config.dart';
 export 'src/models.dart';
 export 'src/pin.dart';
 export 'src/usage_tracker.dart';
