@@ -85,7 +85,7 @@ jobs:
           path: apps/parent/build/app/outputs/flutter-apk/app-debug.apk
 
   firestore-rules:
-    name: Firestore rules (emulator)
+    name: Firestore rules and PC sync (emulators)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -102,5 +102,14 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: .
       - run: npm ci
-      - run: npm test
+      - name: Rules tests
+        run: npm test
+      - name: PC <-> cloud end-to-end test
+        run: npm run test:e2e

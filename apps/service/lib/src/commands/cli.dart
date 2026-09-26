@@ -2,13 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:http/http.dart' as http;
 
 import '../platform/process_control.dart';
 import '../platform/windows_process_control.dart';
 import 'hash_pin_command.dart';
 import 'match_command.dart';
+import 'pair_command.dart';
 import 'processes_command.dart';
 import 'run_command.dart';
+import 'sync_command.dart';
+
+const appVersion = '0.1.0';
 
 /// Everything the commands need from the outside world; tests pass fakes.
 final class CliContext {
@@ -19,8 +24,11 @@ final class CliContext {
     this.readFile = _readFile,
     this.sleep = _sleep,
     Duration Function()? monotonicNow,
+    this.wallClock = DateTime.now,
+    http.Client Function()? httpClient,
     this.stopRequested,
-  }) : monotonicNow = monotonicNow ?? _monotonicClock;
+  }) : monotonicNow = monotonicNow ?? _monotonicClock,
+       httpClient = httpClient ?? http.Client.new;
 
   /// Real environment: stdout, stdin and WinAPI (on Windows only).
   factory CliContext.system() => CliContext(
@@ -44,6 +52,11 @@ final class CliContext {
   /// Monotonic time (not affected by changes of the system clock).
   final Duration Function() monotonicNow;
 
+  /// Calendar time: only for dates of usage records and status reports.
+  final DateTime Function() wallClock;
+
+  final http.Client Function() httpClient;
+
   /// Completes when the user presses Ctrl+C; `null` means "run until time is up".
   final Future<void>? stopRequested;
 
@@ -62,4 +75,6 @@ CommandRunner<int> buildCli(CliContext context) =>
       ..addCommand(ProcessesCommand(context))
       ..addCommand(MatchCommand(context))
       ..addCommand(HashPinCommand(context))
-      ..addCommand(RunCommand(context));
+      ..addCommand(RunCommand(context))
+      ..addCommand(PairCommand(context))
+      ..addCommand(SyncCommand(context));

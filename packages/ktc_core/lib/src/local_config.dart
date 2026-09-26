@@ -30,6 +30,11 @@ final class LocalConfig {
   final List<Child> children;
   final List<AppRule> apps;
 
+  Map<String, Object?> toJson() => {
+    'children': {for (final child in children) child.id: child.toJson()},
+    'apps': {for (final app in apps) app.id: app.toJson()},
+  };
+
   /// Active (not archived) child with [id], or `null`.
   Child? child(String id) {
     for (final child in children) {

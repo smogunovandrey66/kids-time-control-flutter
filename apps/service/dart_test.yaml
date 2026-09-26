@@ -1,0 +1,4 @@
+tags:
+  emulator:
+    # Needs the Firebase emulators; see test/cloud_emulator_test.dart.
+    timeout: 2x

@@ -63,6 +63,7 @@ void main() {
     expect(config.child('ivan')?.name, 'Иван');
     expect(config.child('nobody'), isNull);
     expect(config.apps.map((app) => app.id), ['minecraft', 'roblox']);
+    expect(config.toJson(), example('config'));
   });
 
   test('family, device and usage examples round-trip', () {

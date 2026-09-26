@@ -4,7 +4,9 @@ import 'package:args/command_runner.dart';
 import 'package:ktc_core/ktc_core.dart';
 
 import '../game_monitor.dart';
+import '../storage/data_dir.dart';
 import 'cli.dart';
+import 'cloud_options.dart';
 
 /// `ktc run`: the service loop in a console window, for trying the rules and
 /// the time accounting before installing the service.
@@ -16,8 +18,7 @@ final class RunCommand extends Command<int> {
       ..addOption(
         'config',
         abbr: 'c',
-        help: 'Path to config.json.',
-        mandatory: true,
+        help: 'Path to config.json (default: config.json in --data-dir).',
       )
       ..addOption('child', help: 'Child id from config.json.', mandatory: true)
       ..addOption('pin', help: 'PIN (asked interactively if omitted).')
@@ -31,6 +32,7 @@ final class RunCommand extends Command<int> {
         help: 'Really close games when time is up.',
         negatable: false,
       );
+    addDataDirOption(argParser);
   }
 
   final CliContext _context;
@@ -46,8 +48,9 @@ final class RunCommand extends Command<int> {
   Future<int> run() async {
     final results = argResults!;
     final out = _context.out;
+    final dir = DataDir(results.option('data-dir')!);
     final config = LocalConfig.parse(
-      _context.readFile(results.option('config')!),
+      _context.readFile(results.option('config') ?? dir.configFile.path),
     );
     final child = config.child(results.option('child')!);
     if (child == null) {
@@ -61,16 +64,22 @@ final class RunCommand extends Command<int> {
     }
 
     final limitMinutes = results.option('limit-minutes');
+    var today = dateKey(_context.wallClock());
+    var usage = dir.loadUsage(child.id, today);
     final limit = limitMinutes != null
         ? Duration(minutes: int.parse(limitMinutes))
-        : Duration(seconds: child.limits.secondsFor(DateTime.now()));
+        : child.limitFor(_context.wallClock());
     final interval = Duration(seconds: int.parse(results.option('interval')!));
     final enforce = results.flag('enforce');
 
     final monitor = GameMonitor(
       processes: _context.processes(),
       matcher: AppMatcher(config.apps),
-      tracker: UsageTracker(limit: limit),
+      // Time already played today (restored after a restart) counts too.
+      tracker: UsageTracker(
+        limit: limit,
+        used: Duration(seconds: usage.totalSeconds),
+      ),
     );
 
     out.writeln(
@@ -83,6 +92,7 @@ final class RunCommand extends Command<int> {
     unawaited(_context.stopRequested?.then((_) => stop = true));
 
     var last = _context.monotonicNow();
+    var carryMs = 0;
     var lastGames = <String>{};
     var lastReportedMinute = monitor.tracker.remaining.inMinutes;
 
@@ -94,6 +104,26 @@ final class RunCommand extends Command<int> {
 
       final tick = monitor.tick(elapsed);
       final games = {for (final game in tick.games) game.app.name};
+
+      // Persist usage in whole seconds, carrying fractions over to the next tick.
+      final date = dateKey(_context.wallClock());
+      if (date != today) {
+        today = date;
+        usage = dir.loadUsage(child.id, today);
+      }
+      if (tick.games.isNotEmpty && elapsed <= UsageTracker.maxTickGap) {
+        carryMs += elapsed.inMilliseconds;
+        final seconds = carryMs ~/ 1000;
+        carryMs -= seconds * 1000;
+        if (seconds > 0) {
+          usage = accumulateUsage(
+            usage,
+            seconds,
+            runningAppIds: {for (final game in tick.games) game.app.id},
+          );
+          dir.saveUsage(usage);
+        }
+      }
       if (games.difference(lastGames).isNotEmpty ||
           lastGames.difference(games).isNotEmpty) {
         out.writeln(

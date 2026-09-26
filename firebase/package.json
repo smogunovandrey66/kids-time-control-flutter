@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore --project demo-kids-time-control \"node --test tests/rules.test.mjs\""
+    "test": "firebase emulators:exec --only firestore --project demo-kids-time-control \"node --test tests/rules.test.mjs\"",
+    "test:e2e": "firebase emulators:exec --only auth,firestore --project demo-kids-time-control \"cd ../apps/service && dart test test/cloud_emulator_test.dart\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.2",

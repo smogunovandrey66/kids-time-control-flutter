@@ -11,6 +11,7 @@ executables:
 dependencies:
   args: ^2.7.0
   ffi: ^2.2.0
+  http: ^1.6.0
   ktc_core:
     path: ../../packages/ktc_core
   win32: ^6.4.0
