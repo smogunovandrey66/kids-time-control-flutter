@@ -1,0 +1,9 @@
+{
+  "childId": "ivan",
+  "date": "2026-09-26",
+  "totalSeconds": 2700,
+  "apps": { "minecraft": 2400, "roblox": 600 },
+  "sessions": [
+    { "start": "2026-09-26T15:05:00Z", "end": "2026-09-26T15:50:00Z", "deviceId": "home-pc" }
+  ]
+}

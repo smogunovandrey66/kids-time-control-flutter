@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smogunovandrey66/kids-time-control/shared/schema/child.schema.json",
+  "title": "Child",
+  "description": "families/{familyId}/children/{childId}",
+  "type": "object",
+  "required": ["name", "pinHash", "limits", "archived"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "pinHash": { "$ref": "#/$defs/pinHash" },
+    "limits": {
+      "type": "object",
+      "required": ["weekdaySeconds", "weekendSeconds"],
+      "additionalProperties": false,
+      "properties": {
+        "weekdaySeconds": { "type": "integer", "minimum": 0, "maximum": 86400 },
+        "weekendSeconds": { "type": "integer", "minimum": 0, "maximum": 86400 },
+        "allowedFrom": { "$ref": "#/$defs/timeOfDay" },
+        "allowedTo": { "$ref": "#/$defs/timeOfDay" }
+      }
+    },
+    "bonus": {
+      "description": "Extra time granted by the parent for one day.",
+      "type": "object",
+      "required": ["date", "seconds"],
+      "additionalProperties": false,
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "seconds": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "archived": { "type": "boolean" }
+  },
+  "$defs": {
+    "pinHash": {
+      "description": "pbkdf2-sha256$<iterations>$<salt base64>$<hash base64>",
+      "type": "string",
+      "pattern": "^pbkdf2-sha256\\$[0-9]+\\$[A-Za-z0-9+/=]+\\$[A-Za-z0-9+/=]+$"
+    },
+    "timeOfDay": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" }
+  }
+}

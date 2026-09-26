@@ -1,0 +1,8 @@
+{
+  "name": "Minecraft (Java Edition)",
+  "match": {
+    "exeName": "javaw.exe",
+    "commandLineContains": "minecraft"
+  },
+  "archived": false
+}

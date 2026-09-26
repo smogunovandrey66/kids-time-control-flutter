@@ -1,0 +1,20 @@
+name: Contracts
+
+on:
+  push:
+    branches: [main]
+    paths: ['shared/**', '.github/workflows/contracts.yml']
+  pull_request:
+    paths: ['shared/**', '.github/workflows/contracts.yml']
+
+jobs:
+  validate:
+    name: Validate JSON schemas and examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install jsonschema
+      - run: python shared/validate.py

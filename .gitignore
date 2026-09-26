@@ -1,0 +1,25 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+pubspec_overrides.yaml
+coverage/
+*.iml
+.idea/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Firebase
+firebase/functions/node_modules/
+firebase/.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Secrets
+google-services.json
+GoogleService-Info.plist
+*service-account*.json
+*.keystore
+*.jks
+
+.DS_Store

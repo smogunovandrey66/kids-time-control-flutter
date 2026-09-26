@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smogunovandrey66/kids-time-control/shared/schema/usage.schema.json",
+  "title": "Usage",
+  "description": "families/{familyId}/usage/{childId}_{YYYY-MM-DD}: one child, one local day.",
+  "type": "object",
+  "required": ["childId", "date", "totalSeconds", "apps", "sessions"],
+  "additionalProperties": false,
+  "properties": {
+    "childId": { "type": "string" },
+    "date": { "type": "string", "format": "date" },
+    "totalSeconds": {
+      "description": "Time with at least one game running (not the sum of apps).",
+      "type": "integer",
+      "minimum": 0
+    },
+    "apps": {
+      "description": "Seconds per appId.",
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["start", "end", "deviceId"],
+        "additionalProperties": false,
+        "properties": {
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "deviceId": { "type": "string" }
+        }
+      }
+    }
+  }
+}

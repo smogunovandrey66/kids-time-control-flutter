@@ -1,0 +1,12 @@
+name: kids_time_control
+description: Workspace root. Packages and apps are listed below.
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+workspace:
+  - packages/ktc_core
+
+dev_dependencies:
+  lints: ^6.0.0

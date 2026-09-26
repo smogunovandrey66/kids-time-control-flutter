@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smogunovandrey66/kids-time-control/shared/schema/device.schema.json",
+  "title": "Device",
+  "description": "families/{familyId}/devices/{deviceId}: a paired PC.",
+  "type": "object",
+  "required": ["name", "appVersion", "lastSeen"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string" },
+    "appVersion": { "type": "string" },
+    "lastSeen": { "type": "string", "format": "date-time" },
+    "activeChildId": { "type": ["string", "null"] }
+  }
+}

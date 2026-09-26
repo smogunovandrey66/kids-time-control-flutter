@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smogunovandrey66/kids-time-control/shared/schema/app.schema.json",
+  "title": "App",
+  "description": "families/{familyId}/apps/{appId}: a controlled game and how to recognize its process. Empty or missing criteria are ignored; at least one must be set.",
+  "type": "object",
+  "required": ["name", "match", "archived"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "match": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "exePath": { "type": "string", "description": "Full path, case-insensitive." },
+        "exeName": { "type": "string", "description": "File name, e.g. javaw.exe" },
+        "commandLineContains": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "archived": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Иван",
+  "pinHash": "pbkdf2-sha256$10000$a3RjLXRlc3Qtc2FsdA==$LxrtrmK164FUMoBkx/0kVzkUUXAlTlK3MCyFqTb7Tsc=",
+  "limits": {
+    "weekdaySeconds": 3600,
+    "weekendSeconds": 7200,
+    "allowedFrom": "15:00",
+    "allowedTo": "20:30"
+  },
+  "bonus": { "date": "2026-09-26", "seconds": 900 },
+  "archived": false
+}
