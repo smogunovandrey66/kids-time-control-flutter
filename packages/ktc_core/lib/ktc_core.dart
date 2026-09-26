@@ -2,6 +2,7 @@
 /// time accounting and PIN hashing. No Flutter, no WinAPI: runs and is tested everywhere.
 library;
 
+export 'src/agent_protocol.dart';
 export 'src/app_matcher.dart';
 export 'src/family.dart';
 export 'src/local_config.dart';

@@ -45,11 +45,20 @@ jobs:
         working-directory: apps/service
         run: dart test
 
+      - name: Test the tray agent
+        working-directory: apps/agent
+        run: flutter test
+
       - name: Build ktc.exe
         if: runner.os == 'Windows'
         run: |
           New-Item -ItemType Directory -Force build | Out-Null
           dart compile exe apps/service/bin/ktc.dart -o build/ktc.exe
+
+      - name: Build the tray agent
+        if: runner.os == 'Windows'
+        working-directory: apps/agent
+        run: flutter build windows --release
 
       - name: Package with WinSW
         if: runner.os == 'Windows'
@@ -57,6 +66,7 @@ jobs:
           $package = 'build/kids-time-control-windows'
           New-Item -ItemType Directory -Force $package | Out-Null
           Copy-Item build/ktc.exe, packaging/windows/* $package
+          Copy-Item -Recurse apps/agent/build/windows/x64/runner/Release "$package/agent"
           Invoke-WebRequest https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe -OutFile "$package/KidsTimeControl.exe"
           Compress-Archive -Path "$package/*" -DestinationPath build/kids-time-control-windows.zip -Force
 
@@ -71,12 +81,29 @@ jobs:
           $log = Get-ChildItem "$env:ProgramData/KidsTimeControl/logs" -Filter *.out.log | Select-Object -First 1
           Get-Content $log.FullName
           if (-not (Select-String -Path $log.FullName -Pattern 'Kids Time Control' -Quiet)) { throw 'No service log' }
+          if (-not (Select-String -Path $log.FullName -Pattern 'Waiting for tray agents' -Quiet)) { throw 'The service does not listen for agents' }
+          $run = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name KidsTimeControlAgent
+          Write-Host "Agent autostart: $($run.KidsTimeControlAgent)"
+          if (-not (Test-Path "$env:ProgramFiles/KidsTimeControl/agent/ktc_agent.exe")) { throw 'Agent not installed' }
+
+      # The runner may have no interactive desktop, so this is informational.
+      - name: Tray agent connects to the service
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        run: |
+          Start-Process "$env:ProgramFiles/KidsTimeControl/agent/ktc_agent.exe"
+          Start-Sleep -Seconds 10
+          $log = Get-ChildItem "$env:ProgramData/KidsTimeControl/logs" -Filter *.out.log | Select-Object -First 1
+          Get-Content $log.FullName -Tail 5
+          if (-not (Select-String -Path $log.FullName -Pattern 'Tray agent .* connected' -Quiet)) { throw 'The agent did not connect' }
 
       - name: Uninstall the service
         if: runner.os == 'Windows'
         run: |
           ./build/kids-time-control-windows/uninstall.ps1 -RemoveData
           if (Get-Service KidsTimeControl -ErrorAction SilentlyContinue) { throw 'Service still installed' }
+          if (Get-Process ktc_agent -ErrorAction SilentlyContinue) { throw 'Agent still running' }
+          if ((Get-Item 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run').GetValue('KidsTimeControlAgent')) { throw 'Agent autostart left behind' }
 
       - name: Upload the Windows package
         if: runner.os == 'Windows'

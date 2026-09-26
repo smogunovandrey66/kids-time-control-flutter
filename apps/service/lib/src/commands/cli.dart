@@ -5,7 +5,9 @@ import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 
 import '../platform/process_control.dart';
+import '../platform/session_state.dart';
 import '../platform/windows_process_control.dart';
+import '../platform/windows_session_state.dart';
 import 'hash_pin_command.dart';
 import 'match_command.dart';
 import 'pair_command.dart';
@@ -27,6 +29,7 @@ final class CliContext {
     Duration Function()? monotonicNow,
     this.wallClock = DateTime.now,
     http.Client Function()? httpClient,
+    this.sessionState = const NoSessionState(),
     this.stopRequested,
   }) : monotonicNow = monotonicNow ?? _monotonicClock,
        httpClient = httpClient ?? http.Client.new;
@@ -41,6 +44,9 @@ final class CliContext {
       return WindowsProcessControl();
     },
     readLine: () => stdin.readLineSync(),
+    sessionState: Platform.isWindows
+        ? WindowsSessionState()
+        : const NoSessionState(),
     stopRequested: ProcessSignal.sigint.watch().first,
   );
 
@@ -57,6 +63,9 @@ final class CliContext {
   final DateTime Function() wallClock;
 
   final http.Client Function() httpClient;
+
+  /// Which Windows session is at the screen and whether it is locked.
+  final SessionState sessionState;
 
   /// Completes when the user presses Ctrl+C; `null` means "run until time is up".
   final Future<void>? stopRequested;

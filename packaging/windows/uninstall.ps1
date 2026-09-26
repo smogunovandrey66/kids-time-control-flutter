@@ -11,6 +11,10 @@ param(
 $ErrorActionPreference = 'Stop'
 $wrapper = Join-Path $InstallDir 'KidsTimeControl.exe'
 
+Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -Name KidsTimeControlAgent -ErrorAction SilentlyContinue
+Get-Process ktc_agent -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 1
+
 $service = Get-Service -Name KidsTimeControl -ErrorAction SilentlyContinue
 if ($service) {
   if ($service.Status -ne 'Stopped') {

@@ -9,6 +9,7 @@ workspace:
   - packages/ktc_core
   - apps/service
   - apps/parent
+  - apps/agent
 
 dev_dependencies:
   lints: ^6.0.0

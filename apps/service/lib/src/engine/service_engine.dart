@@ -20,7 +20,9 @@ import 'login_broker.dart';
 ///    [closeGrace] and are then closed, and new ones are closed immediately.
 ///    Closing the games ends the session, so a brother or sister with time
 ///    left can log in right away.
-/// 3. The session ends after [idleTimeout] without games.
+/// 3. The session ends after [idleTimeout] without games, when the child
+///    logs out in the tray agent, or when the screen is locked. While the
+///    screen is locked nobody is asked to log in; games stay suspended.
 final class ServiceEngine {
   ServiceEngine({
     required ProcessControl processes,
@@ -33,8 +35,10 @@ final class ServiceEngine {
     this.closeGrace = const Duration(seconds: 30),
     this.maxFailures = 5,
     this.lockout = const Duration(minutes: 5),
+    bool Function()? screenLocked,
     void Function(String message)? log,
   }) : _processes = processes,
+       _screenLocked = screenLocked ?? (() => false),
        _broker = broker,
        _dir = dir,
        _wallClock = wallClock,
@@ -48,6 +52,7 @@ final class ServiceEngine {
   final DataDir _dir;
   final DateTime Function() _wallClock;
   final Duration Function() _monotonicNow;
+  final bool Function() _screenLocked;
   final void Function(String message) _log;
 
   final Duration idleTimeout;
@@ -71,6 +76,11 @@ final class ServiceEngine {
   final _dirtyUsage = <String, DailyUsage>{};
 
   String? get activeChildId => _session?.child.id;
+
+  String? get activeChildName => _session?.child.name;
+
+  /// Time left for the logged-in child, `null` without a session.
+  Duration? get remaining => _session?.tracker.remaining;
 
   bool get loginPending => _pendingLogin != null;
 
@@ -116,6 +126,9 @@ final class ServiceEngine {
         if (!_closing.containsKey(game.pid)) game,
     ];
 
+    final locked = _screenLocked();
+    if (locked && _session != null) _endSession('screen locked');
+
     final session = _session;
     if (session == null) {
       if (games.isEmpty) return;
@@ -126,6 +139,7 @@ final class ServiceEngine {
           );
         }
       }
+      if (locked) return; // ask when someone is at the PC again
       _pendingLogin ??= _login(
         games.first.app.name,
       ).whenComplete(() => _pendingLogin = null);
@@ -174,11 +188,15 @@ final class ServiceEngine {
           TrackerEvent.warning5Min ||
           TrackerEvent.warning1Min:
         _broker.notify(
-          '${session.child.name}: ${session.tracker.remaining.inMinutes + 1} min left',
+          Notice(
+            kind: NoticeKind.minutesLeft,
+            childName: session.child.name,
+            minutes: session.tracker.remaining.inMinutes + 1,
+          ),
         );
       case TrackerEvent.timeUp:
         _broker.notify(
-          '${session.child.name}: time is up, games will be closed',
+          Notice(kind: NoticeKind.timeUp, childName: session.child.name),
         );
       case TrackerEvent.none:
         break;
@@ -242,7 +260,9 @@ final class ServiceEngine {
       final tracker = _trackerFor(child, usage);
       if (tracker.timeUp) {
         error = LoginError.noTimeLeft;
-        _broker.notify('${child.name}: no time left today');
+        _broker.notify(
+          Notice(kind: NoticeKind.noTimeLeft, childName: child.name),
+        );
         break;
       }
 

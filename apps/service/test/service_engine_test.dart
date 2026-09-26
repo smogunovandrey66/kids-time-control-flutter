@@ -24,7 +24,7 @@ final class FakeBroker implements LoginBroker {
   }
 
   @override
-  void notify(String message) => notifications.add(message);
+  void notify(Notice notice) => notifications.add('$notice');
 }
 
 /// Minecraft started again: a new process.
@@ -40,6 +40,7 @@ void main() {
   late DataDir dir;
   late ServiceEngine engine;
   var now = Duration.zero;
+  var locked = false;
   final wallClock = DateTime(2026, 9, 28, 18); // Monday
 
   LocalConfig config({int weekdayMinutes = 60, Bonus? bonus}) => LocalConfig(
@@ -79,6 +80,7 @@ void main() {
 
   setUp(() {
     now = Duration.zero;
+    locked = false;
     processes = FakeProcessControl([browser]);
     broker = FakeBroker();
     dir = DataDir(Directory.systemTemp.createTempSync('ktc_engine').path);
@@ -91,6 +93,7 @@ void main() {
       config: config(),
       idleTimeout: const Duration(minutes: 1),
       closeGrace: const Duration(seconds: 10),
+      screenLocked: () => locked,
     );
   });
 
@@ -267,5 +270,36 @@ void main() {
     await run(20);
 
     expect(processes.terminated, isEmpty);
+  });
+
+  test('locking the screen logs out; login waits for the unlock', () async {
+    broker.answers.add((childId: 'ivan', pin: '1234'));
+    processes.processes.add(minecraft);
+    await run(2);
+    expect(engine.activeChildId, 'ivan');
+
+    locked = true;
+    await run(20);
+    expect(engine.activeChildId, isNull);
+    expect(processes.suspended, [100, 100], reason: 'paused while locked');
+    expect(broker.prompts, hasLength(1), reason: 'nobody to ask');
+    expect(processes.terminated, isEmpty);
+
+    locked = false;
+    broker.answers.add((childId: 'ivan', pin: '1234'));
+    await run(2);
+    expect(broker.prompts, hasLength(2));
+    expect(engine.activeChildId, 'ivan');
+    expect(processes.resumed, [100, 100]);
+  });
+
+  test('status for the tray', () async {
+    expect(engine.remaining, isNull);
+    broker.answers.add((childId: 'ivan', pin: '1234'));
+    processes.processes.add(minecraft);
+    await run(2);
+    await run(10);
+    expect(engine.activeChildName, 'Ivan');
+    expect(engine.remaining, const Duration(minutes: 59, seconds: 50));
   });
 }

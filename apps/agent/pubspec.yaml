@@ -1,0 +1,27 @@
+name: ktc_agent
+description: Tray agent of Kids Time Control (Flutter, Windows) - asks who is playing.
+publish_to: 'none'
+resolution: workspace
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  ffi: ^2.2.0
+  flutter:
+    sdk: flutter
+  ktc_core:
+    path: ../../packages/ktc_core
+  tray_manager: ^0.5.3
+  win32: ^6.4.0
+  window_manager: ^0.5.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/tray.ico

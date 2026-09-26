@@ -33,5 +33,5 @@ final class ConsoleLoginBroker implements LoginBroker {
   }
 
   @override
-  void notify(String message) => out.writeln('>>> $message');
+  void notify(Notice notice) => out.writeln('>>> $notice');
 }

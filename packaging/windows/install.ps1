@@ -13,6 +13,8 @@ $ErrorActionPreference = 'Stop'
 
 $dataDir = Join-Path $env:ProgramData 'KidsTimeControl'
 $wrapper = Join-Path $InstallDir 'KidsTimeControl.exe'
+$agent = Join-Path $InstallDir 'agent\ktc_agent.exe'
+$runKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
 
 New-Item -ItemType Directory -Force -Path $InstallDir, $dataDir | Out-Null
 
@@ -26,8 +28,21 @@ if ($existing -and $existing.Status -ne 'Stopped') {
   $existing.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(30))
 }
 
+# Running agents lock their files; they are started again below and at the next logon.
+Get-Process ktc_agent -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 1
+
 foreach ($file in 'ktc.exe', 'KidsTimeControl.exe', 'KidsTimeControl.xml') {
   Copy-Item -Path (Join-Path $PSScriptRoot $file) -Destination $InstallDir -Force
+}
+$agentSource = Join-Path $PSScriptRoot 'agent'
+if (Test-Path $agentSource) {
+  $agentDir = Join-Path $InstallDir 'agent'
+  if (Test-Path $agentDir) { Remove-Item -Recurse -Force $agentDir }
+  Copy-Item -Recurse -Path $agentSource -Destination $agentDir
+  # The tray agent starts at logon for every Windows user. HKLM: a child with a
+  # standard account cannot remove it.
+  Set-ItemProperty -Path $runKey -Name KidsTimeControlAgent -Value "`"$agent`""
 }
 
 if (-not $existing) {
@@ -36,6 +51,16 @@ if (-not $existing) {
 }
 & $wrapper start
 if ($LASTEXITCODE -ne 0) { throw "Service start failed ($LASTEXITCODE)" }
+
+if (Test-Path $agent) {
+  # Start the agent for the current user now. Through explorer.exe it runs
+  # without administrator rights, like at logon.
+  if (Get-Process explorer -ErrorAction SilentlyContinue) {
+    Start-Process explorer.exe -ArgumentList "`"$agent`""
+  } else {
+    Start-Process $agent
+  }
+}
 
 Write-Host "Kids Time Control is installed in $InstallDir and running."
 Write-Host "Data and logs: $dataDir"

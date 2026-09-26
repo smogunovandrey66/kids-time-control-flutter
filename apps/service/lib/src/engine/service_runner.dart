@@ -27,6 +27,7 @@ final class ServiceRunner {
     this.tickInterval = const Duration(seconds: 2),
     this.syncInterval = const Duration(minutes: 1),
     this.statusInterval = const Duration(minutes: 5),
+    this.afterTick,
     void Function(String message)? log,
   }) : _log = log ?? ((_) {});
 
@@ -39,6 +40,9 @@ final class ServiceRunner {
   final Duration tickInterval;
   final Duration syncInterval;
   final Duration statusInterval;
+
+  /// Called after every engine tick (e.g. to update the tray agents).
+  final void Function()? afterTick;
   final void Function(String message) _log;
 
   var _stopped = false;
@@ -56,6 +60,7 @@ final class ServiceRunner {
       await sleep(tickInterval);
       final now = monotonicNow();
       engine.tick(now - last);
+      afterTick?.call();
       last = now;
       if (cloud != null &&
           _sync == null &&
