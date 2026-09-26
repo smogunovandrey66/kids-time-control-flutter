@@ -1,0 +1,119 @@
+rules_version = '2';
+
+// Kids Time Control security rules. Works on the free Spark plan: no Cloud Functions.
+//
+// Actors:
+//  - parent: signed in with a non-anonymous provider, listed in families/{id}.parents;
+//  - device (PC): signed in anonymously, listed in families/{id}.deviceUids after pairing.
+//
+// The key guarantee: a device (and therefore a child at the PC) can never change
+// limits, PINs or the list of games. It may only report usage and its own status.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAnonymous() {
+      return request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    function familyData(familyId) {
+      return get(/databases/$(database)/documents/families/$(familyId)).data;
+    }
+
+    function isParent(familyId) {
+      return signedIn() && request.auth.uid in familyData(familyId).parents;
+    }
+
+    function isDevice(familyId) {
+      return signedIn() && request.auth.uid in familyData(familyId).get('deviceUids', []);
+    }
+
+    function isMember(familyId) {
+      return isParent(familyId) || isDevice(familyId);
+    }
+
+    function onlyKeys(keys) {
+      return request.resource.data.keys().hasOnly(keys);
+    }
+
+    match /families/{familyId} {
+      // Queries: parents look up families by `parents`, devices by `deviceUids`.
+      allow list: if signedIn() && (
+        request.auth.uid in resource.data.parents ||
+        request.auth.uid in resource.data.get('deviceUids', [])
+      );
+      allow get: if isMember(familyId);
+
+      allow create: if signedIn() && !isAnonymous()
+        && onlyKeys(['name', 'parents', 'deviceUids', 'timeZone'])
+        && request.resource.data.parents == [request.auth.uid]
+        && request.resource.data.deviceUids == []
+        && request.resource.data.timeZone is string;
+
+      // Parents manage devices and settings; the list of parents itself is fixed.
+      allow update: if isParent(familyId)
+        && onlyKeys(['name', 'parents', 'deviceUids', 'timeZone'])
+        && request.resource.data.parents == resource.data.parents
+        && request.resource.data.deviceUids is list;
+
+      allow delete: if false;
+
+      match /children/{childId} {
+        allow read: if isMember(familyId);
+        allow write: if isParent(familyId)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 40
+          && request.resource.data.pinHash.matches('^pbkdf2-sha256[$][0-9]+[$].+[$].+$')
+          && request.resource.data.limits.weekdaySeconds is int
+          && request.resource.data.limits.weekendSeconds is int;
+        allow delete: if isParent(familyId);
+      }
+
+      match /apps/{appId} {
+        allow read: if isMember(familyId);
+        allow write: if isParent(familyId)
+          && request.resource.data.name is string
+          && request.resource.data.match is map;
+        allow delete: if isParent(familyId);
+      }
+
+      match /devices/{deviceId} {
+        allow read: if isParent(familyId)
+          || (isDevice(familyId) && deviceId == request.auth.uid);
+        // A device updates only its own status document.
+        allow create, update: if isParent(familyId)
+          || (isDevice(familyId) && deviceId == request.auth.uid);
+        allow delete: if isParent(familyId);
+      }
+
+      match /usage/{usageId} {
+        allow read: if isMember(familyId);
+        // Only devices report usage; the document id is {childId}_{date}.
+        allow create, update: if isDevice(familyId)
+          && usageId == request.resource.data.childId + '_' + request.resource.data.date
+          && request.resource.data.totalSeconds is int
+          && request.resource.data.totalSeconds >= 0;
+        allow delete: if isParent(familyId);
+      }
+    }
+
+    // Pairing: the PC creates a short-lived code, the parent's app reads it by
+    // code (no listing), adds the device to the family and deletes the code.
+    match /pairingRequests/{code} {
+      allow create: if signedIn()
+        && code.matches('^[A-Z2-9]{8}$')
+        && onlyKeys(['uid', 'deviceName', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow get: if signedIn() && !isAnonymous()
+        && resource.data.createdAt > request.time - duration.value(15, 'm');
+      allow list, update: if false;
+      allow delete: if signedIn()
+        && (resource.data.uid == request.auth.uid || !isAnonymous());
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smogunovandrey66/kids-time-control/shared/schema/family.schema.json",
+  "title": "Family",
+  "description": "families/{familyId}: parents (non-anonymous uids) and paired PCs (anonymous uids).",
+  "type": "object",
+  "required": ["name", "parents", "deviceUids", "timeZone"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string" },
+    "parents": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "deviceUids": { "type": "array", "items": { "type": "string" } },
+    "timeZone": { "type": "string", "description": "IANA time zone; days in usage documents are local to it." }
+  }
+}

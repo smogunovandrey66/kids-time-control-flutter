@@ -46,7 +46,9 @@ jobs:
 
       - name: Build ktc.exe
         if: runner.os == 'Windows'
-        run: dart compile exe apps/service/bin/ktc.dart -o build/ktc.exe
+        run: |
+          New-Item -ItemType Directory -Force build | Out-Null
+          dart compile exe apps/service/bin/ktc.dart -o build/ktc.exe
 
       - name: Upload ktc.exe
         if: runner.os == 'Windows'
@@ -54,3 +56,24 @@ jobs:
         with:
           name: ktc-windows
           path: build/ktc.exe
+
+  firestore-rules:
+    name: Firestore rules (emulator)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: firebase
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: firebase/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm test

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smogunovandrey66/kids-time-control/shared/schema/pairingRequest.schema.json",
+  "title": "PairingRequest",
+  "description": "pairingRequests/{code}: created by a PC, code = 8 characters [A-Z2-9], valid for 15 minutes.",
+  "type": "object",
+  "required": ["uid", "deviceName", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "uid": { "type": "string", "description": "Anonymous Firebase uid of the PC." },
+    "deviceName": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp." }
+  }
+}

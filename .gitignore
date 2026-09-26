@@ -23,3 +23,5 @@ GoogleService-Info.plist
 *.jks
 
 .DS_Store
+firebase/node_modules/
+ui-debug.log

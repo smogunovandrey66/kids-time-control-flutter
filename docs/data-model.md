@@ -4,15 +4,28 @@ JSON-схемы документов — в `shared/schema/`, примеры —
 CI проверяет, что примеры соответствуют схемам.
 
 ```
-families/{familyId}
-  ├─ parents: [uid]
+families/{familyId}               — family.schema.json
+  ├─ parents: [uid]                 — родители (вход через Google)
+  ├─ deviceUids: [uid]              — привязанные ПК (анонимный вход)
   ├─ timeZone: "Europe/Moscow"
   │
   ├─ children/{childId}          — child.schema.json
   ├─ apps/{appId}                — app.schema.json
   ├─ devices/{deviceId}          — device.schema.json
   └─ usage/{childId}_{YYYY-MM-DD} — usage.schema.json
+
+pairingRequests/{code}           — pairingRequest.schema.json, живёт 15 минут
 ```
+
+## Права доступа
+
+Правила — `firebase/firestore.rules`, тесты — `firebase/tests/rules.test.mjs` (эмулятор, CI).
+
+| Кто | families | children, apps | devices | usage | pairingRequests |
+|---|---|---|---|---|---|
+| Родитель | читает, меняет (кроме списка родителей) | читает, пишет | читает, пишет | читает, удаляет | читает по коду, удаляет |
+| ПК семьи | читает | **только читает** | пишет только свой документ | пишет | создаёт свой код |
+| Чужие | нет | нет | нет | нет | нет |
 
 ## Правила
 
