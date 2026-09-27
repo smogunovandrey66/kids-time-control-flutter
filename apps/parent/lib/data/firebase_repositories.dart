@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ktc_core/ktc_core.dart';
 
@@ -25,9 +26,14 @@ final class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInWithGoogle() async {
-    // The browser IDP flow (signInWithProvider) breaks on Android when the
-    // browser partitions storage, so use the native Google account picker.
-    if (Platform.isAndroid) {
+    // Web first: dart:io Platform throws on web, so kIsWeb must be checked
+    // before any Platform use. Popups are blocked in many in-app browsers,
+    // so redirect the whole page to Google instead. Android: the browser IDP
+    // flow breaks in storage-partitioned browsers, so use the native Google
+    // account picker.
+    if (kIsWeb) {
+      await _auth.signInWithRedirect(GoogleAuthProvider());
+    } else if (Platform.isAndroid) {
       final google = GoogleSignIn(scopes: ['email']);
       final account = await google.signIn();
       if (account == null) return; // cancelled
